@@ -1,25 +1,23 @@
 import 'package:hsk_learner/sql/sql_helper.dart';
-import 'package:postgres/postgres.dart';
+import 'package:postgres/postgres.dart' hide ConnectionInfo;
 import 'package:sqflite/sqflite.dart';
 
 import 'connection_db_info.dart';
 
 class PgUpdate {
-  static late PostgreSQLConnection connection;
+  static late Connection connection;
   static bool connected = false;
-  static Future<PostgreSQLConnection> psql() async {
-    if (connected == false || connection.isClosed) {
+  static Future<Connection> psql() async {
+    if (connected == false || !connection.isOpen) {
       // will be added back later
       ConnectionInfo connectionInfo = ConnectionInfo();
-      connection = PostgreSQLConnection(
-        connectionInfo.host,
-        connectionInfo.port,
-        connectionInfo.databaseName,
-        username: connectionInfo.username,
-        password: connectionInfo.password,
-        useSSL: connectionInfo.useSSL,
+      Endpoint endpoint = Endpoint(
+          host: connectionInfo.host,
+          database: connectionInfo.databaseName,
+          username: connectionInfo.username,
+          password: connectionInfo.password,
       );
-      await connection.open();
+      connection = await Connection.open(endpoint);
       connected = true;
     }
     return connection;
@@ -27,40 +25,40 @@ class PgUpdate {
 
   static Future<bool> updateSqliteFromPg() async {
     final pgdb = await psql();
-    List<Map<String, Map<String, dynamic>>> hsk = await pgdb.mappedResultsQuery(
+    List<Map<String, Map<String, dynamic>>> hsk = (await pgdb.execute(
       """
       SELECT * FROM courses ORDER BY id
     """,
-    );
+    )) as List<Map<String, Map<String, dynamic>>>;
     List<Map<String, dynamic>> hskResult = [];
     for (final row in hsk) {
       hskResult.add(row["courses"]!);
     }
-    List<Map<String, Map<String, dynamic>>> sentences = await pgdb
-        .mappedResultsQuery("""
+    List<Map<String, Map<String, dynamic>>> sentences = (await pgdb
+        .execute("""
       SELECT * FROM sentences ORDER BY id
-    """);
+    """)) as List<Map<String, Map<String, dynamic>>>;
     List<Map<String, dynamic>> sentencesResult = [];
     for (final row in sentences) {
       sentencesResult.add(row["sentences"]!);
     }
 
-    List<Map<String, Map<String, dynamic>>> units = await pgdb
-        .mappedResultsQuery("""
+    List<Map<String, Map<String, dynamic>>> units = (await pgdb
+        .execute("""
       SELECT * FROM units ORDER BY unit_id
-    """);
+    """)) as List<Map<String, Map<String, dynamic>>>;
     List<Map<String, dynamic>> unitsResult = [];
     for (final row in units) {
       unitsResult.add(row["units"]!);
     }
 
-    List<Map<String, Map<String, dynamic>>> subUnits = await pgdb
-        .mappedResultsQuery("""
+    List<Map<String, Map<String, dynamic>>> subUnits = (await pgdb
+        .execute("""
       select unit, subunit, 0 as completed from courses
       where unit is not null and subunit is not null
       group by unit, subunit
       order by unit, subunit
-    """);
+    """)) as List<Map<String, Map<String, dynamic>>>;
     List<Map<String, dynamic>> subUnitsResult = [];
     for (final row in subUnits) {
       subUnitsResult.add(row["courses"]!);

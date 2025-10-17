@@ -168,7 +168,7 @@ Widget bottomTitleWidgets(double value, TitleMeta meta) {
       break;
   }
 
-  return SideTitleWidget(axisSide: meta.axisSide, child: text);
+  return text;
 }
 
 double daysBetween(DateTime from, DateTime to) {
