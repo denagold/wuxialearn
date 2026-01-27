@@ -1,13 +1,12 @@
 import 'dart:async';
 
-//import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
+import 'package:hsk_learner/service/audio_service.dart';
 import 'package:hsk_learner/utils/large_text.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../settings/preferences.dart';
 import '../../utils/styles.dart';
 
@@ -27,6 +26,8 @@ class MatchingGame extends StatefulWidget {
 }
 
 class _MatchingGameState extends State<MatchingGame> {
+  late final _audioService = context.read<AudioService>();
+
   int numCords = 0;
   List leftYCords = [];
   List rightYCords = [];
@@ -42,22 +43,11 @@ class _MatchingGameState extends State<MatchingGame> {
   double offset = 0.2;
   List completed = [];
   bool isFinished = false;
-  final player = AudioPlayer();
-  FlutterTts flutterTts = FlutterTts();
   late bool showPinyin;
-  setLanguage() async {
-    await flutterTts.setLanguage("zh-CN");
-  }
-
-  Future speak(String text) async {
-    await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.speak(text);
-  }
 
   @override
   void initState() {
     super.initState();
-    setLanguage();
     showPinyin = ShowPinyin.showPinyin;
     numCords = widget.wordList.length;
     leftYCords = createYCordList(numCords);
@@ -69,9 +59,9 @@ class _MatchingGameState extends State<MatchingGame> {
     }
   }
 
-  pushToTop({required int index, required String side}) {
+  void pushToTop({required int index, required String side}) {
     if (side == "left") {
-      speak(widget.wordList[index].hanzi);
+      _audioService.speak(widget.wordList[index].hanzi);
     }
     if (lastClicked != side && lastClicked != "") {
       int leftIndex = 0;
@@ -122,7 +112,7 @@ class _MatchingGameState extends State<MatchingGame> {
     }
   }
 
-  push({required int index, required List list}) {
+  void push({required int index, required List list}) {
     for (int i = 0; i < list.length; i++) {
       if (list[i] < list[index] && list[i] >= top) {
         if (list[i] != list[index]) {
@@ -135,6 +125,8 @@ class _MatchingGameState extends State<MatchingGame> {
 
   @override
   Widget build(BuildContext context) {
+    final audioService = context.read<AudioService>();
+
     List<Widget> stackLayers = List<Widget>.generate(
       widget.wordList.length * 2,
       (index) {
@@ -214,8 +206,7 @@ class _MatchingGameState extends State<MatchingGame> {
                       fit: FlexFit.tight,
                       child: TextButton(
                         onPressed: () async {
-                          await player.setAsset('assets/correct.wav');
-                          player.play();
+                          audioService.playCorrectSound();
                           widget.callback(
                             true,
                             WordItem(LargeText.hskMap),
@@ -235,7 +226,7 @@ class _MatchingGameState extends State<MatchingGame> {
     );
   }
 
-  createAnimatedAlign({
+  AnimatedAlign createAnimatedAlign({
     required int index,
     required List yCords,
     required String side,
@@ -283,7 +274,7 @@ class _MatchingGameState extends State<MatchingGame> {
   }
 }
 
-createYCordList(length) {
+List<double> createYCordList(int length) {
   double offset = 2 / (length - 1);
   final fixedLengthList = List<double>.generate(length, (int index) {
     if (index == length - 1) {

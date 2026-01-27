@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/learn/unit_learn.dart';
+import 'package:hsk_learner/service/audio_service.dart';
+import 'package:provider/provider.dart';
 import '../../sql/learn_sql.dart';
 import '../../widgets/hsk_listview/hsk_listview.dart';
 import '../games/unit_game.dart';
@@ -34,6 +35,7 @@ class SubunitView extends StatefulWidget {
 }
 
 class _SubunitViewState extends State<SubunitView> {
+  late final _audioService = context.read<AudioService>();
   late Future<List<Map<String, dynamic>>> sentenceList;
   final bool debug = Preferences.getPreference("debug");
   final bool allowSkipUnits = Preferences.getPreference("allow_skip_units");
@@ -41,17 +43,7 @@ class _SubunitViewState extends State<SubunitView> {
   @override
   void initState() {
     sentenceList = LearnSql.getSentencesForSubunit(widget.unit, widget.subunit);
-    setLanguage();
     super.initState();
-  }
-
-  FlutterTts flutterTts = FlutterTts();
-  setLanguage() async {
-    await flutterTts.setLanguage("zh-CN");
-  }
-
-  Future speak(String text) async {
-    await flutterTts.speak(text);
   }
 
   @override
@@ -77,7 +69,7 @@ class _SubunitViewState extends State<SubunitView> {
                     showPinyin: true,
                     separator: true,
                     callback: (String s) {
-                      speak(s);
+                      _audioService.speak(s);
                     },
                     showPlayButton: true,
                   );

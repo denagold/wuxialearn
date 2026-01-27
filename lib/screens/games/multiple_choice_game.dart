@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
+import 'package:hsk_learner/service/audio_service.dart';
 import 'dart:math';
-import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 import '../settings/preferences.dart';
 import '../../utils/styles.dart';
 
@@ -16,13 +16,13 @@ class ChineseToEnglishGame extends StatefulWidget {
   final int index;
   final bool? chineseToEnglish;
   const ChineseToEnglishGame({
-    Key? key,
+    super.key,
     required this.currWord,
     required this.wordList,
     required this.callback,
     required this.index,
     required this.chineseToEnglish,
-  }) : super(key: key);
+  });
 
   @override
   State<ChineseToEnglishGame> createState() => _ChineseToEnglishGameState();
@@ -30,14 +30,7 @@ class ChineseToEnglishGame extends StatefulWidget {
 
 class _ChineseToEnglishGameState extends State<ChineseToEnglishGame> {
   bool clicked = false;
-  FlutterTts flutterTts = FlutterTts();
-  setLanguage() async {
-    await flutterTts.setLanguage("zh-CN");
-  }
-
-  Future speak(String text) async {
-    await flutterTts.speak(text);
-  }
+  late final _audioService = context.read<AudioService>();
 
   late final String wordToTranslate;
   late bool showPinyin;
@@ -51,7 +44,7 @@ class _ChineseToEnglishGameState extends State<ChineseToEnglishGame> {
             ? widget.currWord.hanzi
             : widget.currWord.translation;
     if (widget.chineseToEnglish!) {
-      speak(wordToTranslate);
+      _audioService.speak(wordToTranslate);
     }
   }
 
@@ -125,7 +118,7 @@ class _ChineseToEnglishGameState extends State<ChineseToEnglishGame> {
                         visible: false,
                         child: IconButton(
                           onPressed: () {
-                            speak(wordToTranslate);
+                            _audioService.speak(wordToTranslate);
                           },
                           icon: const Icon(Icons.volume_up),
                         ),
@@ -145,7 +138,7 @@ class _ChineseToEnglishGameState extends State<ChineseToEnglishGame> {
                         visible: widget.chineseToEnglish!,
                         child: IconButton(
                           onPressed: () {
-                            speak(wordToTranslate);
+                            _audioService.speak(wordToTranslate);
                           },
                           icon: const Icon(Icons.volume_up),
                         ),
@@ -217,7 +210,6 @@ class _AnswersListState extends State<AnswersList> {
   @override
   void initState() {
     super.initState();
-    setLanguage();
     bool debug = Preferences.getPreference("debug");
     final groupWordsCopy = List.generate(
       widget.wordList.length,
@@ -237,21 +229,12 @@ class _AnswersListState extends State<AnswersList> {
     );
   }
 
-  final player = AudioPlayer();
-  FlutterTts flutterTts = FlutterTts();
-  setLanguage() async {
-    await flutterTts.setLanguage("zh-CN");
-  }
-
-  Future speak(String text) async {
-    await flutterTts.awaitSpeakCompletion(true);
-    await flutterTts.speak(text);
-  }
-
   late List<Color> colorsList;
 
   @override
   Widget build(BuildContext context) {
+    final audioService = context.read<AudioService>();
+
     return Column(
       children: List<Widget>.generate(buttonSelectionWords.length, (int i) {
         bool isCorrect;
@@ -272,23 +255,13 @@ class _AnswersListState extends State<AnswersList> {
                 setState(() {
                   colorsList[i] = const Color(0xFF00FF00);
                 });
-                try {
-                  //await player.play(AssetSource('correct.wav'));
-                  await player.setAsset('assets/correct.wav');
-                  await player.load();
-                  player.play();
-                } catch (e) {
-                  print(e);
-                }
-                speak(buttonSelectionWords[i].hanzi);
+                audioService.playCorrectSound();
+                audioService.speak(buttonSelectionWords[i].hanzi);
               } else {
                 setState(() {
                   colorsList[i] = const Color(0xFFFF0000);
                 });
-                await player.setAsset('assets/wrong.wav');
-                await player.load();
-                player.play();
-                //await player.play(AssetSource('wrong.wav'));
+                audioService.playWrongSound();
               }
               Future.delayed(const Duration(milliseconds: 500), () {
                 widget.callback(

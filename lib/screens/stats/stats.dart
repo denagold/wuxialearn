@@ -1,14 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/stats/word_view.dart';
+import 'package:hsk_learner/service/audio_service.dart';
 import 'package:hsk_learner/sql/stats_sql.dart';
+import 'package:provider/provider.dart';
 
 import '../../utils/styles.dart';
 
 class StatsPage extends StatefulWidget {
-  const StatsPage({Key? key}) : super(key: key);
+  const StatsPage({super.key});
 
   @override
   State<StatsPage> createState() => _StatsPageState();
@@ -126,7 +127,7 @@ class _StatsPageState extends State<StatsPage> {
     );
   }
 
-  _showSortByActionSheet<bool>(BuildContext context) {
+  void _showSortByActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -150,7 +151,7 @@ class _StatsPageState extends State<StatsPage> {
     );
   }
 
-  _showOrderByActionSheet<bool>(BuildContext context) {
+  void _showOrderByActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -183,35 +184,17 @@ class _HskListview extends StatelessWidget {
   final Axis scrollAxis;
   final bool showPlayButton;
   const _HskListview({
-    Key? key,
+    super.key,
     required this.statsListFuture,
     required this.showTranslation,
     required this.connectTop,
     required this.color,
     required this.scrollAxis,
     required this.showPlayButton,
-  }) : super(key: key);
-
-  get flutterTts => null;
+  });
 
   @override
   Widget build(BuildContext context) {
-    FlutterTts flutterTts = FlutterTts();
-    setLanguage() async {
-      await flutterTts.setLanguage("zh-CN");
-    }
-
-    setLanguage();
-    Future speak(String text) async {
-      //await flutterTts.setLanguage("zh-CN");
-      var result = await flutterTts.speak(text);
-      //if (result == 1) setState(() => ttsState = TtsState.playing);
-    }
-
-    playCallback(String str) {
-      speak(str);
-    }
-
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: statsListFuture,
       builder: (
@@ -249,7 +232,6 @@ class _HskListview extends StatelessWidget {
                               wordItem: wordList[index],
                               showTranslation: showTranslation,
                               separator: true,
-                              callback: playCallback,
                               showPlayButton: showPlayButton,
                             );
                           },
@@ -273,19 +255,18 @@ class _HskListviewItem extends StatelessWidget {
   final WordItem wordItem;
   final bool showTranslation;
   final bool separator;
-  final Function(String) callback;
   final bool showPlayButton;
   const _HskListviewItem({
-    Key? key,
+    super.key,
     required this.wordItem,
     required this.showTranslation,
     required this.separator,
-    required this.callback,
     required this.showPlayButton,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    final audioService = context.read<AudioService>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Container(
@@ -340,7 +321,7 @@ class _HskListviewItem extends StatelessWidget {
             showPlayButton
                 ? IconButton(
                   onPressed: () {
-                    callback(wordItem.hanzi);
+                    audioService.speak(wordItem.hanzi);
                   },
                   icon: const Icon(Icons.volume_up),
                 )

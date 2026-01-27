@@ -6,11 +6,11 @@ class FlashCard extends StatefulWidget {
   final Widget back;
   final bool showFrontSide;
   const FlashCard({
-    Key? key,
+    super.key,
     required this.front,
     required this.back,
     required this.showFrontSide,
-  }) : super(key: key);
+  });
 
   @override
   _FlashCardState createState() => _FlashCardState();

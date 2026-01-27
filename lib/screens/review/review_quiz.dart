@@ -5,7 +5,7 @@ import 'package:hsk_learner/sql/learn_sql.dart';
 
 class ReviewQuiz extends StatefulWidget {
   final Future<List<Map<String, dynamic>>> hskList;
-  const ReviewQuiz({Key? key, required this.hskList}) : super(key: key);
+  const ReviewQuiz({super.key, required this.hskList});
 
   @override
   State<ReviewQuiz> createState() => _ReviewQuizState();

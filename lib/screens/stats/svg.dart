@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' hide Colors;
 import 'package:hsk_learner/sql/sql_helper.dart';
 
-import '../../widgets/delayed_progress_indecator.dart';
+import '../../widgets/delayed_progress_indicator.dart';
 
 const ids = ['⿰', '⿱', '⿲', '⿳', '⿴', '⿵', '⿶', '⿷', '󰃿', '󰃰', '⿻'];
 
@@ -94,11 +94,11 @@ class _DisplaySvgCharacter extends StatefulWidget {
   final void Function(String character) onClick;
 
   const _DisplaySvgCharacter({
-    Key? key,
+    super.key,
     required this.characterData,
     required this.size,
     required this.onClick,
-  }) : super(key: key);
+  });
 
   @override
   _DisplaySvgCharacterState createState() => _DisplaySvgCharacterState();

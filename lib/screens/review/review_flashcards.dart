@@ -2,11 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hsk_learner/data_model/review_rating.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/stats/character_view.dart';
+import 'package:hsk_learner/service/audio_service.dart';
 import 'package:hsk_learner/sql/review_flashcards_sql.dart';
+import 'package:provider/provider.dart';
 
 import '../../sql/stats_sql.dart';
 import '../../sql/word_view_sql.dart';
@@ -15,25 +16,28 @@ import '../settings/preferences.dart';
 import 'flashcard.dart';
 
 class ReviewFlashcards extends StatefulWidget {
+
   final Future<List<Map<String, dynamic>>> hskList;
   final Function update;
   final String type;
   final int deckSize;
   final List<ReviewRating> ratings;
   const ReviewFlashcards({
-    Key? key,
+    super.key,
     required this.hskList,
     required this.update,
     required this.type,
     required this.deckSize,
     required this.ratings,
-  }) : super(key: key);
+  });
 
   @override
   State<ReviewFlashcards> createState() => _ReviewFlashcardsState();
 }
 
 class _ReviewFlashcardsState extends State<ReviewFlashcards> {
+  late final _audioService = context.read<AudioService>();
+
   bool lastPage = false;
   bool wasClicked = false;
   bool showPinyin = Preferences.getPreference(
@@ -52,15 +56,14 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
     reviewList = widget.hskList;
     super.initState();
     setShowHint();
-    setLanguage();
   }
 
-  setShowHint() async {
+  Future<void> setShowHint() async {
     List<WordItem> wordList = createWordList(await widget.hskList);
     showShowHint = wordList[0].hanzi.length > 1;
   }
 
-  nextButtonCallback() {
+  void nextButtonCallback() {
     setState(() {
       wasClicked = true;
     });
@@ -131,15 +134,6 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
-  }
-
-  FlutterTts flutterTts = FlutterTts();
-  setLanguage() async {
-    await flutterTts.setLanguage("zh-CN");
-  }
-
-  Future speak(String text) async {
-    await flutterTts.speak(text);
   }
 
   @override
@@ -255,7 +249,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
                                                       visible: false,
                                                       child: IconButton(
                                                         onPressed: () {
-                                                          speak(
+                                                          _audioService.speak(
                                                             wordList[pageIndex]
                                                                 .hanzi,
                                                           );
@@ -309,7 +303,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
                                                       visible: showPinyin,
                                                       child: IconButton(
                                                         onPressed: () {
-                                                          speak(
+                                                          _audioService.speak(
                                                             wordList[pageIndex]
                                                                 .hanzi,
                                                           );
@@ -375,7 +369,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
                                                       visible: false,
                                                       child: IconButton(
                                                         onPressed: () {
-                                                          speak(
+                                                          _audioService.speak(
                                                             wordList[pageIndex]
                                                                 .hanzi,
                                                           );
@@ -429,7 +423,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
                                                       visible: true,
                                                       child: IconButton(
                                                         onPressed: () {
-                                                          speak(
+                                                          _audioService.speak(
                                                             wordList[pageIndex]
                                                                 .hanzi,
                                                           );
@@ -512,8 +506,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
 
 class _ShowNextCardButton extends StatelessWidget {
   final Function() callback;
-  const _ShowNextCardButton({Key? key, required this.callback})
-    : super(key: key);
+  const _ShowNextCardButton({super.key, required this.callback});
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -536,8 +529,7 @@ class _ShowNextCardButton extends StatelessWidget {
 class _AnswerButton extends StatelessWidget {
   final Function(int value) callback;
   final List<ReviewRating> ratings;
-  const _AnswerButton({Key? key, required this.callback, required this.ratings})
-    : super(key: key);
+  const _AnswerButton({super.key, required this.callback, required this.ratings});
   @override
   Widget build(BuildContext context) {
     return Row(

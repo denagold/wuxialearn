@@ -2,7 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:hsk_learner/service/audio_service.dart';
+import 'package:provider/provider.dart';
 import '../../data_model/word_item.dart';
 import '../../sql/learn_sql.dart';
 import '../../sql/manage_review_sql.dart';
@@ -21,7 +22,7 @@ class UnitGame extends StatefulWidget {
   final Function updateUnits;
   final String courseName;
   const UnitGame({
-    Key? key,
+    super.key,
     required this.wordList,
     required this.sentenceList,
     required this.unit,
@@ -30,13 +31,14 @@ class UnitGame extends StatefulWidget {
     required this.name,
     required this.updateUnits,
     required this.courseName,
-  }) : super(key: key);
+  });
 
   @override
   State<UnitGame> createState() => _UnitGameState();
 }
 
 class _UnitGameState extends State<UnitGame> {
+  late final audioService = context.read<AudioService>();
   final PageController _pageController = PageController();
   List<Widget> gamesList = [];
   int gameIndex = 0;
@@ -63,20 +65,7 @@ class _UnitGameState extends State<UnitGame> {
         ),
       );
     }
-    _initPlayers();
-  }
-
-  final player = AudioPlayer();
-
-  //this is an issue on android where the first play of the player is cut off
-  Future<void> _initPlayers() async {
-    await player.setAsset('assets/correct.wav');
-    await player.load();
-    final volume = player.volume;
-    await player.setVolume(0.0);
-    await player.play();
-    await player.stop();
-    await player.setVolume(volume);
+    audioService.initTestPlay();
   }
 
   void callback(bool value, WordItem currWord, bool? chineseToEnglish) async {

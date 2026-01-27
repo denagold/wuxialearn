@@ -1,15 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:hsk_learner/screens/settings/preferences.dart';
+import 'package:hsk_learner/service/audio_service.dart';
+import 'package:provider/provider.dart';
 import '../../sql/learn_sql.dart';
 import '../stats/character_view.dart';
 
 class UnitLearn extends StatefulWidget {
   const UnitLearn({
-    Key? key,
+    super.key,
     required this.wordList,
     required this.unit,
     required this.subunit,
@@ -17,7 +18,7 @@ class UnitLearn extends StatefulWidget {
     required this.name,
     required this.updateUnits,
     required this.courseName,
-  }) : super(key: key);
+  });
   final List<WordItem> wordList;
   final int unit;
   final int subunit;
@@ -31,22 +32,12 @@ class UnitLearn extends StatefulWidget {
 }
 
 class _UnitLearnState extends State<UnitLearn> {
+  late final _audioService = context.read<AudioService>();
   final PageController _pageController = PageController();
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
-  }
-
-  FlutterTts flutterTts = FlutterTts();
-  setLanguage() async {
-    await flutterTts.setLanguage("zh-CN");
-  }
-
-  Future speak(String text) async {
-    //await flutterTts.setLanguage("zh-CN");
-    var result = await flutterTts.speak(text);
-    //if (result == 1) setState(() => ttsState = TtsState.playing);
   }
 
   late List<Future<List<Map<String, dynamic>>>> futureList;
@@ -59,7 +50,7 @@ class _UnitLearnState extends State<UnitLearn> {
     return data;
   }
 
-  getSentenceList() async {
+  Future<void> getSentenceList() async {
     sentenceList = await LearnSql.getSentencesForSubunit(
       widget.unit,
       widget.subunit,
@@ -78,16 +69,16 @@ class _UnitLearnState extends State<UnitLearn> {
     exampleFuture = getUnits(0);
     futureList = List.generate(widget.wordList.length, (i) => getUnits(i));
     getSentenceList();
-    setLanguage();
     showLiteralPref = Preferences.getPreference(
       "show_literal_meaning_in_unit_learn",
     );
     showExampleSentences = Preferences.getPreference("show_sentences");
-    speak(widget.wordList[0].hanzi);
+    _audioService.speak(widget.wordList[0].hanzi);
   }
 
   @override
   Widget build(BuildContext context) {
+    final audioService = context.read<AudioService>();
     return CupertinoPageScaffold(
       child: SafeArea(
         child: Column(
@@ -125,7 +116,7 @@ class _UnitLearnState extends State<UnitLearn> {
                 controller: _pageController,
                 itemCount: widget.wordList.length,
                 onPageChanged: (index) {
-                  speak(widget.wordList[index].hanzi);
+                  audioService.speak(widget.wordList[index].hanzi);
                   if (index + 1 == widget.wordList.length) {
                     lastPage = true;
                   }
@@ -161,7 +152,7 @@ class _UnitLearnState extends State<UnitLearn> {
                                   visible: false,
                                   child: IconButton(
                                     onPressed: () {
-                                      speak(widget.wordList[pageIndex].hanzi);
+                                      audioService.speak(widget.wordList[pageIndex].hanzi);
                                     },
                                     icon: const Icon(Icons.volume_up),
                                   ),
@@ -198,7 +189,7 @@ class _UnitLearnState extends State<UnitLearn> {
                                 ),
                                 IconButton(
                                   onPressed: () {
-                                    speak(widget.wordList[pageIndex].hanzi);
+                                    audioService.speak(widget.wordList[pageIndex].hanzi);
                                   },
                                   icon: const Icon(Icons.volume_up),
                                 ),
@@ -339,7 +330,7 @@ class _UnitLearnState extends State<UnitLearn> {
                                                 ),
                                                 IconButton(
                                                   onPressed: () {
-                                                    speak(
+                                                    audioService.speak(
                                                       exampleList[examplesIndex]["characters"],
                                                     );
                                                   },

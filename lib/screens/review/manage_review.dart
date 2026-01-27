@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/widgets/delayed_progress_indecator.dart';
+import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 
 import '../../data_model/word_item.dart';
 import '../../sql/manage_review_sql.dart';
@@ -8,7 +8,7 @@ import '../../utils/styles.dart';
 import '../stats/word_view.dart';
 
 class ManageReview extends StatefulWidget {
-  const ManageReview({Key? key}) : super(key: key);
+  const ManageReview({super.key});
 
   @override
   State<ManageReview> createState() => _ManageReviewState();
@@ -293,7 +293,7 @@ class _HskListview extends StatelessWidget {
   final bool showRemove;
 
   const _HskListview({
-    Key? key,
+    super.key,
     required this.statsListFuture,
     required this.showTranslation,
     required this.connectTop,
@@ -301,7 +301,7 @@ class _HskListview extends StatelessWidget {
     required this.scrollAxis,
     required this.onClick,
     required this.showRemove,
-  }) : super(key: key);
+  });
 
   playCallback(int i) {
     onClick(i);
@@ -373,13 +373,13 @@ class _HskListviewItem extends StatelessWidget {
   final Function(int) callback;
   final bool showRemove;
   const _HskListviewItem({
-    Key? key,
+    super.key,
     required this.wordItem,
     required this.showTranslation,
     required this.separator,
     required this.callback,
     required this.showRemove,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

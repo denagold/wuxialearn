@@ -11,7 +11,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:flutter/services.dart';
 
 class Settings extends StatefulWidget {
-  const Settings({Key? key}) : super(key: key);
+  const Settings({super.key});
 
   @override
   State<Settings> createState() => _SettingsState();

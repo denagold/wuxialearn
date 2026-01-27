@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/sql/review_sql.dart';
-import 'package:hsk_learner/widgets/delayed_progress_indecator.dart';
+import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 
 import '../../data_model/review_rating.dart';
 

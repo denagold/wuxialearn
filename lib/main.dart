@@ -2,14 +2,25 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hsk_learner/screens/settings/preferences.dart';
+import 'package:hsk_learner/service/audio_service.dart';
+import 'package:hsk_learner/service/theme_service.dart';
 import 'package:hsk_learner/utils/platform_info.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hsk_learner/screens/home/load_app.dart';
 
 void main() {
   initSettings();
-  runApp(const MyApp(fdroid: true));
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<AppTheme>(create: (context) => AppTheme()),
+        Provider<AudioService>(create: (context) => AudioService()),
+      ],
+      child: const MyApp(fdroid: true)
+    )
+  );
 }
 
 void initSettings() {
@@ -63,71 +74,12 @@ class _MyAppState extends State<MyApp> {
             _ => Brightness.light,
           };
           return Theme(
-            data: ThemeData(
-              brightness: brightness,
-              fontFamily: '.SF UI Text',
-              colorScheme: ColorScheme.fromSwatch(
-                brightness: brightness,
-                primarySwatch: Colors.blue,
-              ),
-            ),
+            data: AppTheme.getMaterialTheme(brightness),
             child: CupertinoApp(
-              theme: CupertinoThemeData(
-                brightness: brightness,
-                primaryColor: Colors.blue,
-                textTheme: CupertinoTextThemeData(
-                  textStyle: TextStyle(
-                    fontFamily: 'Roboto',
-                    color:
-                        brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                  ),
-                  actionTextStyle: TextStyle(
-                    fontFamily: 'Roboto',
-                    color:
-                        brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                  ),
-                  navActionTextStyle: const TextStyle(
-                    fontFamily: 'Roboto',
-                    color: Colors.blue,
-                  ),
-                  navLargeTitleTextStyle: TextStyle(
-                    fontFamily: 'Roboto',
-                    color:
-                        brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                  ),
-                  navTitleTextStyle: TextStyle(
-                    fontFamily: 'Roboto',
-                    color:
-                        brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                  ),
-                  pickerTextStyle: TextStyle(
-                    fontFamily: 'Roboto',
-                    color:
-                        brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                  ),
-                  dateTimePickerTextStyle: TextStyle(
-                    fontFamily: 'Roboto',
-                    color:
-                        brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                  ),
-                ),
-              ),
+              theme: AppTheme.getCupertinoTheme(brightness),
               scrollBehavior: const CupertinoScrollBehavior(),
               title: 'Wuxia Learn',
               home: LoadApp(fdroid: widget.fdroid),
-              //home: const MyStatefulWidget(),
             ),
           );
         } else {
@@ -150,7 +102,6 @@ class MyApp2 extends StatelessWidget {
       themeMode: ThemeMode.system,
       title: 'Wuxia Learn',
       home: const LoadApp(fdroid: true),
-      //home: const MyStatefulWidget(),
     );
   }
 }

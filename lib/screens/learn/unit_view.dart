@@ -13,12 +13,12 @@ class UnitView extends StatefulWidget {
   final Function updateUnits;
   final String courseName;
   const UnitView({
-    Key? key,
+    super.key,
     required this.unit,
     required this.name,
     required this.updateUnits,
     required this.courseName,
-  }) : super(key: key);
+  });
 
   @override
   State<UnitView> createState() => _UnitViewState();

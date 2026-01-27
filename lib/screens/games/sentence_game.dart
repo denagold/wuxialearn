@@ -1,11 +1,11 @@
 import 'dart:math';
 
 import 'package:hsk_learner/screens/games/unit_game.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:hsk_learner/service/audio_service.dart';
 import 'package:lpinyin/lpinyin.dart';
+import 'package:provider/provider.dart';
 
 import '../settings/preferences.dart';
 import '../../widgets/fixed_align.dart';
@@ -18,18 +18,20 @@ class SentenceGame extends StatefulWidget {
   final bool buildEnglish;
 
   const SentenceGame({
-    Key? key,
+    super.key,
     required this.callback,
     required this.currSentence,
     required this.index,
     required this.buildEnglish,
-  }) : super(key: key);
+  });
 
   @override
   State<SentenceGame> createState() => _SentenceGameState();
 }
 
 class _SentenceGameState extends State<SentenceGame> {
+  late final _audioService = context.read<AudioService>();
+
   late final String alreadyBuiltSentence;
   late final String sentenceToBuild;
   late final List<String> words;
@@ -37,7 +39,6 @@ class _SentenceGameState extends State<SentenceGame> {
 
   @override
   void initState() {
-    setLanguage();
     alreadyBuiltSentence =
         widget.buildEnglish
             ? widget.currSentence["characters"]
@@ -46,7 +47,7 @@ class _SentenceGameState extends State<SentenceGame> {
         widget.buildEnglish
             ? widget.currSentence["meaning"]
             : widget.currSentence["characters"];
-    speak(widget.currSentence["characters"]);
+    _audioService.speak(widget.currSentence["characters"]);
     //now that we have tokenized we can just do one for both
     //words = widget.buildEnglish ? sentenceToBuild.split(" ") : sentenceToBuild.replaceAll(" ", "").split("");
     //words = sentenceToBuild.split(" ");
@@ -90,15 +91,6 @@ class _SentenceGameState extends State<SentenceGame> {
     //words.shuffle();
   }
 
-  FlutterTts flutterTts = FlutterTts();
-  setLanguage() async {
-    await flutterTts.setLanguage("zh-CN");
-  }
-
-  Future speak(String text) async {
-    await flutterTts.speak(text);
-  }
-
   Widget checkAnswerWidget = const SizedBox(height: 0);
   late bool showPinyin;
 
@@ -119,7 +111,6 @@ class _SentenceGameState extends State<SentenceGame> {
   int pinyinNumRows = 1;
   double textHeight = 25;
   List<double> topHeights = [-1];
-  final player = AudioPlayer();
   bool isNotAnswered = true;
   late bool isCorrect;
   late BoxConstraints cons;
@@ -147,7 +138,7 @@ class _SentenceGameState extends State<SentenceGame> {
             " , ",
           ];
           if (!specialChars.contains(word)) {
-            speak(words[index]);
+            _audioService.speak(words[index]);
           }
         }
         setState(() {
@@ -340,6 +331,7 @@ class _SentenceGameState extends State<SentenceGame> {
 
   @override
   Widget build(BuildContext context) {
+    final audioService = context.read<AudioService>();
     return CupertinoPageScaffold(
       child: SafeArea(
         child: Stack(
@@ -410,7 +402,7 @@ class _SentenceGameState extends State<SentenceGame> {
                       visible: widget.buildEnglish,
                       child: IconButton(
                         onPressed: () {
-                          speak(alreadyBuiltSentence);
+                          audioService.speak(alreadyBuiltSentence);
                         },
                         icon: const Icon(Icons.volume_up),
                       ),
@@ -507,20 +499,10 @@ class _SentenceGameState extends State<SentenceGame> {
                                               ),
                                             );
                                           });
-                                          await player.setAsset(
-                                            'assets/correct.wav',
-                                          );
-                                          player.play();
-                                          //player.play(AssetSource('correct.wav'));
-                                          //player.release();
+                                          audioService.playWrongSound();
                                         } else {
                                           isCorrect = false;
-                                          await player.setAsset(
-                                            'assets/wrong.wav',
-                                          );
-                                          player.play();
-                                          //player.play(AssetSource('wrong.wav'));
-                                          //player.release();
+                                          audioService.playCorrectSound();
                                           void callback(bool isCorrect) {
                                             widget.callback(
                                               isCorrect,

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hsk_learner/sql/review_sql.dart';
-import 'package:hsk_learner/widgets/delayed_progress_indecator.dart';
+import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 
 class ReviewProgress extends StatefulWidget {
   const ReviewProgress({super.key});

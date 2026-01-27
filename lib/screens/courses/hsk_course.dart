@@ -6,7 +6,7 @@ import 'course_view.dart';
 
 class HSKCourseView extends StatefulWidget {
   final void Function(String courseName) changeCourse;
-  const HSKCourseView({Key? key, required this.changeCourse}) : super(key: key);
+  const HSKCourseView({super.key, required this.changeCourse});
 
   @override
   State<HSKCourseView> createState() => _HSKCourseViewState();

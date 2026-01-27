@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
-import 'package:hsk_learner/widgets/delayed_progress_indecator.dart';
+import 'package:hsk_learner/service/audio_service.dart';
+import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 import 'package:hsk_learner/utils/large_text.dart';
 import 'package:hsk_learner/utils/prototype.dart';
+import 'package:provider/provider.dart';
 
 class HskListview extends StatelessWidget {
   final Future<List<Map<String, dynamic>>> hskList;
@@ -15,7 +16,7 @@ class HskListview extends StatelessWidget {
   final Widget emptyListMessage;
   final bool showPinyin;
   const HskListview({
-    Key? key,
+    super.key,
     required this.hskList,
     required this.showTranslation,
     required this.connectTop,
@@ -24,28 +25,11 @@ class HskListview extends StatelessWidget {
     this.showPlayButton = true,
     this.emptyListMessage = const Text(""),
     required this.showPinyin,
-  }) : super(key: key);
-
-  get flutterTts => null;
+  });
 
   @override
   Widget build(BuildContext context) {
-    FlutterTts flutterTts = FlutterTts();
-    setLanguage() async {
-      await flutterTts.setLanguage("zh-CN");
-    }
-
-    setLanguage();
-    Future speak(String text) async {
-      //await flutterTts.setLanguage("zh-CN");
-      var result = await flutterTts.speak(text);
-      //if (result == 1) setState(() => ttsState = TtsState.playing);
-    }
-
-    playCallback(String str) {
-      speak(str);
-    }
-
+    final audioService = context.read<AudioService>();
     switch (scrollAxis) {
       case Axis.vertical:
         return FutureBuilder<List<Map<String, dynamic>>>(
@@ -96,7 +80,7 @@ class HskListview extends StatelessWidget {
                                         wordItem: wordList[index],
                                         showTranslation: showTranslation,
                                         separator: true,
-                                        callback: playCallback,
+                                        callback: audioService.speak,
                                         showPlayButton: showPlayButton,
                                         showPinyin: showPinyin,
                                       );
@@ -122,7 +106,7 @@ class HskListview extends StatelessWidget {
             color: color,
             wordItem: wordMap,
             showTranslation: showTranslation,
-            playCallback: playCallback,
+            playCallback: audioService.speak,
             showPlayButton: showPlayButton,
             showPinyin: showPinyin,
           ),
@@ -162,7 +146,7 @@ class HskListview extends StatelessWidget {
                                   wordItem: wordList[index],
                                   showTranslation: showTranslation,
                                   separator: false,
-                                  callback: playCallback,
+                                  callback: audioService.speak,
                                   showPlayButton: showPlayButton,
                                   showPinyin: showPinyin,
                                 );
@@ -177,7 +161,7 @@ class HskListview extends StatelessWidget {
                     color: color,
                     wordItem: wordMap,
                     showTranslation: showTranslation,
-                    playCallback: playCallback,
+                    playCallback: audioService.speak,
                     showPlayButton: showPlayButton,
                     showPinyin: showPinyin,
                   ),
@@ -249,14 +233,14 @@ class HskListviewItem extends StatelessWidget {
   final bool showPlayButton;
   final bool showPinyin;
   const HskListviewItem({
-    Key? key,
+    super.key,
     required this.wordItem,
     required this.showTranslation,
     required this.separator,
     required this.callback,
     required this.showPlayButton,
     required this.showPinyin,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
