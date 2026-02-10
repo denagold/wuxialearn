@@ -499,10 +499,10 @@ class _SentenceGameState extends State<SentenceGame> {
                                               ),
                                             );
                                           });
-                                          audioService.playWrongSound();
+                                          audioService.playCorrectSound();
                                         } else {
                                           isCorrect = false;
-                                          audioService.playCorrectSound();
+                                          audioService.playWrongSound();
                                           void callback(bool isCorrect) {
                                             widget.callback(
                                               isCorrect,

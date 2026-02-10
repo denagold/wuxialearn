@@ -29,9 +29,7 @@ class _UnitViewState extends State<UnitView> {
   late Future<List<Map<String, dynamic>>> sentencesFuture;
   late Future<List<Map<String, dynamic>>> subunitFuture;
   final bool debug = Preferences.getPreference("debug");
-  final bool allowAutoComplete = Preferences.getPreference(
-    "allow_auto_complete_unit",
-  );
+  final bool allowAutoComplete = true;
 
   @override
   initState() {

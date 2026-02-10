@@ -40,7 +40,8 @@ class Styles {
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
     ),
   );
-  static createButton(color) {
+
+  static ButtonStyle createButton(Color color) {
     return ButtonStyle(
       minimumSize: WidgetStateProperty.all<Size>(const Size.fromHeight(40)),
       overlayColor: WidgetStateProperty.all(Colors.transparent),
@@ -52,7 +53,7 @@ class Styles {
     );
   }
 
-  static createButtonOnlyBottomBorderRadius(color) {
+  static ButtonStyle createButtonOnlyBottomBorderRadius(Color color) {
     return ButtonStyle(
       minimumSize: WidgetStateProperty.all<Size>(const Size.fromHeight(40)),
       overlayColor: WidgetStateProperty.all(Colors.transparent),
@@ -66,7 +67,7 @@ class Styles {
     );
   }
 
-  static createButtonNoBorderRadius(color) {
+  static ButtonStyle createButtonNoBorderRadius(Color color) {
     return ButtonStyle(
       minimumSize: WidgetStateProperty.all<Size>(const Size.fromHeight(40)),
       overlayColor: WidgetStateProperty.all(Colors.transparent),
@@ -75,7 +76,7 @@ class Styles {
     );
   }
 
-  static createButton2(color, {Color border = Colors.transparent}) {
+  static ButtonStyle createButton2(Color color, {Color border = Colors.transparent}) {
     return ButtonStyle(
       elevation: WidgetStateProperty.all<double>(1.5),
       minimumSize: WidgetStateProperty.all<Size>(const Size(160, 75)),

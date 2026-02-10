@@ -1,14 +1,19 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hsk_learner/repositories/user_preferences_repository.dart';
 import 'package:hsk_learner/screens/settings/preferences.dart';
 import 'package:hsk_learner/service/audio_service.dart';
+import 'package:hsk_learner/service/preferences_service.dart';
 import 'package:hsk_learner/service/theme_service.dart';
 import 'package:hsk_learner/utils/platform_info.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hsk_learner/screens/home/load_app.dart';
+
 
 void main() {
   initSettings();
@@ -17,6 +22,8 @@ void main() {
       providers: [
         Provider<AppTheme>(create: (context) => AppTheme()),
         Provider<AudioService>(create: (context) => AudioService()),
+        Provider<PreferencesServiceBase>(create: (context) => PreferencesService(),),
+        Provider<UserPreferencesRepository>(create: (context) => UserPreferencesRepository(context.read<PreferencesServiceBase>())),
       ],
       child: const MyApp(fdroid: true)
     )
@@ -24,6 +31,15 @@ void main() {
 }
 
 void initSettings() {
+  Logger.root.level = Level.INFO;
+
+  // Write logs to stdout for now
+  Logger.root.onRecord.listen((record) {
+    if (kDebugMode) {
+      print('${record.level.name}: ${record.time}: ${record.message}');
+    }
+  });
+
   if (PlatformInfo.isDesktop()) {
     // Initialize FFI
     sqfliteFfiInit();

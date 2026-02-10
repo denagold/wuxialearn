@@ -36,7 +36,7 @@ dependencies:
   csv:
   cupertino_icons: ^1.0.2
   d4_dsv:
-  file_picker: 10.3.8
+  file_picker: 10.3.10
   fl_chart: ^1.1.1
   flutter_file_dialog: ^3.0.2
   flutter_tts: ^4.2.3
@@ -44,7 +44,9 @@ dependencies:
   intl:
   just_audio:
   just_audio_windows:
+  logging:
   lpinyin: ^2.0.2
+  mockito: ^5.6.3
   path:
   path_provider: ^2.0.12
   postgres: ^3.5.8
@@ -55,6 +57,7 @@ dependencies:
   sqflite_common_ffi:
   sqflite_common_ffi_web: '>=0.1.0-dev.1'
   tar: ^2.0.0
+  test: ^1.26.3
   vector_math:
   version: ^3.0.2
 

@@ -1,8 +1,16 @@
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
+
+
+class AudioConstants {
+  static const String correct = "assets/correct.wav";
+  static const String wrong = "assets/wrong.wav";
+}
 
 class AudioService {
+  late final log = Logger('AudioService');
   static final AudioService _instance = AudioService._internal();
   factory AudioService() => _instance;
   AudioService._internal();
@@ -17,7 +25,7 @@ class AudioService {
 
   Future<void> initTestPlay() async {
     // This is because of an issue on android, the first play of the player is always cut off
-    await _audioPlayer.setAsset('assets/correct.wav');
+    await _audioPlayer.setAsset(AudioConstants.correct);
     await _audioPlayer.load();
     final volume = _audioPlayer.volume;
     await _audioPlayer.setVolume(0.0);
@@ -34,28 +42,29 @@ class AudioService {
     }
     catch (e)
     {
-      debugPrint('Error in speak: $e');
+      log.warning('Error in speak: $e');
     }
   }
 
   // Sound effect methods
   Future<void> playCorrectSound() async {
-    try {
-      await _audioPlayer.setAsset('assets/correct.wav');
-      await _audioPlayer.load();
-      await _audioPlayer.play();
-    } catch (e) {
-      debugPrint('Error playing correct sound: $e');
-    }
+    await playSound(audioName: AudioConstants.correct);
+    log.info('Correct sound played');
   }
 
   Future<void> playWrongSound() async {
+    await playSound(audioName: AudioConstants.wrong);
+    log.info('Wrong sound played');
+  }
+
+  Future<void> playSound({required String audioName}) async {
     try {
-      await _audioPlayer.setAsset('assets/wrong.wav');
+      await _audioPlayer.stop();
+      await _audioPlayer.setAsset(audioName);
       await _audioPlayer.load();
       await _audioPlayer.play();
     } catch (e) {
-      debugPrint('Error playing wrong sound: $e');
+      log.warning('Error playing correct sound: $e');
     }
   }
 

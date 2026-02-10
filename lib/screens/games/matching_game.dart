@@ -48,6 +48,7 @@ class _MatchingGameState extends State<MatchingGame> {
   @override
   void initState() {
     super.initState();
+    _audioService.initTestPlay();
     showPinyin = ShowPinyin.showPinyin;
     numCords = widget.wordList.length;
     leftYCords = createYCordList(numCords);

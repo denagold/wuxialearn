@@ -71,8 +71,11 @@ class Preferences {
   }
 
   static Future<void> initPreferences() async {
+    // Load the actual preferences from the database
     final data = await PreferencesSql.getPreferences();
+    // Load the default template file even if we found preferences in the database
     await Preferences.loadDefaultPreferences();
+    // Merge the default template with the actual preferences from the database
     Preferences.setPreferences(data);
   }
 }

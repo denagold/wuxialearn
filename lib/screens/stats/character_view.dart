@@ -4,6 +4,7 @@ import 'package:hsk_learner/screens/settings/preferences.dart';
 import 'package:hsk_learner/screens/stats/svg.dart';
 import 'package:hsk_learner/sql/character_view_sql.dart';
 import 'package:hsk_learner/utils/prototype.dart';
+import 'package:hsk_learner/widgets/common/toggle_buttons.dart';
 
 class CharacterView extends StatefulWidget {
   final String character;
@@ -34,32 +35,19 @@ class _CharacterViewState extends State<CharacterView> {
       child: SafeArea(
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      showTranslations = !showTranslations;
-                    });
-                  },
-                  child:
-                      showTranslations
-                          ? const Text("Hide translation")
-                          : const Text("Show translation"),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      showPinyin = !showPinyin;
-                    });
-                  },
-                  child:
-                      showPinyin
-                          ? const Text("Hide Pinyin")
-                          : const Text("Show Pinyin"),
-                ),
-              ],
+            ToggleButtonsWidget(
+              showPinyin: showPinyin,
+              showTranslations: showTranslations,
+              onPinyinToggle: (bool value) {
+                setState(() {
+                  showPinyin = value;
+                });
+              },
+              onTranslationToggle: (bool value) {
+                setState(() {
+                  showTranslations = value;
+                });
+              },
             ),
             FutureBuilder<List<Map<String, dynamic>>>(
               future: literalMeaning,
@@ -183,32 +171,19 @@ class _SentencesState extends State<_Sentences> {
                   ),
                 ),
                 SliverToBoxAdapter(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            showTranslations = !showTranslations;
-                          });
-                        },
-                        child:
-                            showTranslations
-                                ? const Text("Hide translation")
-                                : const Text("Show translation"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            showPinyin = !showPinyin;
-                          });
-                        },
-                        child:
-                            showPinyin
-                                ? const Text("Hide Pinyin")
-                                : const Text("Show Pinyin"),
-                      ),
-                    ],
+                  child: ToggleButtonsWidget(
+                          showPinyin: showPinyin,
+                          showTranslations: showTranslations,
+                          onPinyinToggle: (bool value) {
+                              setState(() {
+                              showPinyin = value;
+                            });
+                          },
+                          onTranslationToggle: (bool value) {
+                              setState(() {
+                              showTranslations = value;
+                            });
+                          },
                   ),
                 ),
                 SliverList(
