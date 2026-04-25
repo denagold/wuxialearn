@@ -32,7 +32,7 @@ class UnitLearn extends StatefulWidget {
 }
 
 class _UnitLearnState extends State<UnitLearn> {
-  late final _audioService = context.read<AudioService>();
+  late final _audioService = context.read<AudioServiceBase>();
   final PageController _pageController = PageController();
   @override
   void dispose() {
@@ -78,7 +78,7 @@ class _UnitLearnState extends State<UnitLearn> {
 
   @override
   Widget build(BuildContext context) {
-    final audioService = context.read<AudioService>();
+    final audioService = context.read<AudioServiceBase>();
     return CupertinoPageScaffold(
       child: SafeArea(
         child: Column(

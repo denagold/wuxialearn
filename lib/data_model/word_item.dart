@@ -3,30 +3,38 @@ class WordItem {
   late final String hanzi;
   late final String pinyin;
   late final String translation;
-  final List<String> literal = [];
-  WordItem(Map<String, dynamic> wordMap) {
-    id = wordMap["id"];
-    hanzi = wordMap["hanzi"];
-    pinyin = wordMap["pinyin"];
-    translation = wordMap["translations0"];
+  late final List<String> literal;
+
+  WordItem.fromMap(Map<String, dynamic> wordMap) {
+    // Parse the first four meaning of a word
+    late List<String> literalList = [];
     if (wordMap["char_one"] != null) {
-      literal.add(wordMap["char_one"]);
+      literalList.add(wordMap["char_one"]);
       if (wordMap["char_two"] != null) {
-        literal.add(wordMap["char_two"]);
+        literalList.add(wordMap["char_two"]);
         if (wordMap["char_three"] != null) {
-          literal.add(wordMap["char_three"]);
+          literalList.add(wordMap["char_three"]);
           if (wordMap["char_four"] != null) {
-            literal.add(wordMap["char_four"]);
+            literalList.add(wordMap["char_four"]);
           }
         }
       }
     }
+
+    id = int.parse(wordMap["id"].toString());
+    hanzi = wordMap["hanzi"]  ?? '';
+    pinyin = wordMap["pinyin"] ?? '';
+    translation = wordMap["translations0"] ?? '';
+    literal = literalList;
   }
+
+  WordItem(this.id, this.hanzi, this.pinyin, this.translation, this.literal);
+  
 }
 
 class WordItemWithSubunit extends WordItem {
   late final int subunit;
-  WordItemWithSubunit(Map<String, dynamic> wordMap) : super(wordMap) {
+  WordItemWithSubunit(Map<String, dynamic> wordMap) : super.fromMap(wordMap) {
     subunit = wordMap["subunit"];
   }
 }
@@ -34,7 +42,7 @@ class WordItemWithSubunit extends WordItem {
 List<WordItem> createWordList(List<Map<String, dynamic>> wordList) {
   List<WordItem> wordItemList = [];
   for (final word in wordList) {
-    wordItemList.add(WordItem(word));
+    wordItemList.add(WordItem.fromMap(word));
   }
   return wordItemList;
 }

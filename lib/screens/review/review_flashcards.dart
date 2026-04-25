@@ -36,7 +36,7 @@ class ReviewFlashcards extends StatefulWidget {
 }
 
 class _ReviewFlashcardsState extends State<ReviewFlashcards> {
-  late final _audioService = context.read<AudioService>();
+  late final _audioService = context.read<AudioServiceBase>();
 
   bool lastPage = false;
   bool wasClicked = false;

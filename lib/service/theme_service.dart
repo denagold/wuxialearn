@@ -33,32 +33,51 @@ class AppColors {
   }
 }
 
-class AppTheme {
+abstract class ThemeServiceBase {
+  Brightness getBrightness();
+  void setBrightness(Brightness brightness);
+  ThemeData getMaterialTheme();
+  CupertinoThemeData getCupertinoTheme();
+}
+
+
+class ThemeService extends ThemeServiceBase {
+
+  late Brightness _brightness;
+
+  @override
+  Brightness getBrightness() => _brightness;
+
+  @override
+  void setBrightness(Brightness brightness) => _brightness = brightness;
+
   // Material theme data
-  static ThemeData getMaterialTheme(Brightness brightness) {
+  @override
+  ThemeData getMaterialTheme() {
     return ThemeData(
-      brightness: brightness,
+      brightness: _brightness,
       fontFamily: '.SF UI Text',
       colorScheme: ColorScheme.fromSwatch(
-        brightness: brightness,
+        brightness: _brightness,
         primarySwatch: Colors.blue,
       ),
     );
   }
 
   // Cupertino theme data
-  static CupertinoThemeData getCupertinoTheme(Brightness brightness) {
+  @override
+  CupertinoThemeData getCupertinoTheme() {
     return CupertinoThemeData(
-      brightness: brightness,
+      brightness: _brightness,
       primaryColor: AppColors.primaryColor,
       textTheme: CupertinoTextThemeData(
         textStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(brightness),
+          color: AppColors.getTextColor(_brightness),
         ),
         actionTextStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(brightness),
+          color: AppColors.getTextColor(_brightness),
         ),
         navActionTextStyle: const TextStyle(
           fontFamily: 'Roboto',
@@ -66,19 +85,19 @@ class AppTheme {
         ),
         navLargeTitleTextStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(brightness),
+          color: AppColors.getTextColor(_brightness),
         ),
         navTitleTextStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(brightness),
+          color: AppColors.getTextColor(_brightness),
         ),
         pickerTextStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(brightness),
+          color: AppColors.getTextColor(_brightness),
         ),
         dateTimePickerTextStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(brightness),
+          color: AppColors.getTextColor(_brightness),
         ),
       ),
     );

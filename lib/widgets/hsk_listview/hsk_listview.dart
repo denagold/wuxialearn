@@ -29,7 +29,7 @@ class HskListview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final audioService = context.read<AudioService>();
+    final audioService = context.read<AudioServiceBase>();
     switch (scrollAxis) {
       case Axis.vertical:
         return FutureBuilder<List<Map<String, dynamic>>>(
@@ -98,7 +98,7 @@ class HskListview extends StatelessWidget {
           },
         );
       case Axis.horizontal:
-        final wordMap = WordItem(LargeText.hskMap);
+        final wordMap = WordItem.fromMap(LargeText.hskMap);
         return PrototypeHeight(
           backgroundColor: Colors.transparent,
           prototype: PrototypeHorizontalHskListView(

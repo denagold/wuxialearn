@@ -266,7 +266,7 @@ class _HskListviewItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final audioService = context.read<AudioService>();
+    final audioService = context.read<AudioServiceBase>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Container(

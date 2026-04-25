@@ -35,7 +35,7 @@ class SubunitView extends StatefulWidget {
 }
 
 class _SubunitViewState extends State<SubunitView> {
-  late final _audioService = context.read<AudioService>();
+  late final _audioService = context.read<AudioServiceBase>();
   late Future<List<Map<String, dynamic>>> sentenceList;
   final bool debug = Preferences.getPreference("debug");
   final bool allowSkipUnits = Preferences.getPreference("allow_skip_units");

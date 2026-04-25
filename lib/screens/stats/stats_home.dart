@@ -402,7 +402,7 @@ class _HorizontalHskList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wordMap = WordItem(LargeText.hskMap);
+    final wordMap = WordItem.fromMap(LargeText.hskMap);
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,

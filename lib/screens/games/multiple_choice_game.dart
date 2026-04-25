@@ -30,7 +30,7 @@ class ChineseToEnglishGame extends StatefulWidget {
 
 class _ChineseToEnglishGameState extends State<ChineseToEnglishGame> {
   bool clicked = false;
-  late final _audioService = context.read<AudioService>();
+  late final _audioService = context.read<AudioServiceBase>();
 
   late final String wordToTranslate;
   late bool showPinyin;
@@ -233,7 +233,7 @@ class _AnswersListState extends State<AnswersList> {
 
   @override
   Widget build(BuildContext context) {
-    final audioService = context.read<AudioService>();
+    final audioService = context.read<AudioServiceBase>();
 
     return Column(
       children: List<Widget>.generate(buttonSelectionWords.length, (int i) {

@@ -38,7 +38,7 @@ class UnitGame extends StatefulWidget {
 }
 
 class _UnitGameState extends State<UnitGame> {
-  late final audioService = context.read<AudioService>();
+  late final audioService = context.read<AudioServiceBase>();
   final PageController _pageController = PageController();
   List<Widget> gamesList = [];
   int gameIndex = 0;

@@ -20,8 +20,8 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        Provider<AppTheme>(create: (context) => AppTheme()),
-        Provider<AudioService>(create: (context) => AudioService()),
+        Provider<ThemeServiceBase>(create: (context) => ThemeService()),
+        Provider<AudioServiceBase>(create: (context) => AudioService()),
         Provider<PreferencesServiceBase>(create: (context) => PreferencesService(),),
         Provider<UserPreferencesRepository>(create: (context) => UserPreferencesRepository(context.read<PreferencesServiceBase>())),
       ],
@@ -74,6 +74,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeServiceBase themeService = context.read<ThemeServiceBase>();
     return FutureBuilder(
       future: initPrefs,
       builder: (context, snapshot) {
@@ -89,10 +90,11 @@ class _MyAppState extends State<MyApp> {
             "system" => MediaQuery.platformBrightnessOf(context),
             _ => Brightness.light,
           };
+          themeService.setBrightness(brightness);
           return Theme(
-            data: AppTheme.getMaterialTheme(brightness),
+            data: themeService.getMaterialTheme(),
             child: CupertinoApp(
-              theme: AppTheme.getCupertinoTheme(brightness),
+              theme: themeService.getCupertinoTheme(),
               scrollBehavior: const CupertinoScrollBehavior(),
               title: 'Wuxia Learn',
               home: LoadApp(fdroid: widget.fdroid),

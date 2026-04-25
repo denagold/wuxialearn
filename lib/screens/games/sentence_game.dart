@@ -30,7 +30,7 @@ class SentenceGame extends StatefulWidget {
 }
 
 class _SentenceGameState extends State<SentenceGame> {
-  late final _audioService = context.read<AudioService>();
+  late final _audioService = context.read<AudioServiceBase>();
 
   late final String alreadyBuiltSentence;
   late final String sentenceToBuild;
@@ -331,7 +331,7 @@ class _SentenceGameState extends State<SentenceGame> {
 
   @override
   Widget build(BuildContext context) {
-    final audioService = context.read<AudioService>();
+    final audioService = context.read<AudioServiceBase>();
     return CupertinoPageScaffold(
       child: SafeArea(
         child: Stack(

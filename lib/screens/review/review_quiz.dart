@@ -33,7 +33,7 @@ class _ReviewQuizState extends State<ReviewQuiz> {
           List<Map<String, dynamic>> sentenceList = [];
           if (hskMap != null) {
             for (var i = 0; i < hskMap.length; i++) {
-              wordList.add(WordItem(hskMap[i]["hskList"]![0]));
+              wordList.add(WordItem.fromMap(hskMap[i]["hskList"]![0]));
               if (hskMap[i]["sentenceList"] != null) {
                 if (hskMap[i]["sentenceList"]!.isNotEmpty) {
                   sentenceList.add(hskMap[i]["sentenceList"]![0]);

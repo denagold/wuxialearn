@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:hsk_learner/data_model/word_item.dart';
-import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:hsk_learner/service/audio_service.dart';
 import 'package:hsk_learner/utils/large_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/widgets/common/toggle_buttons.dart';
 import 'package:provider/provider.dart';
 import '../settings/preferences.dart';
 import '../../utils/styles.dart';
@@ -26,7 +26,7 @@ class MatchingGame extends StatefulWidget {
 }
 
 class _MatchingGameState extends State<MatchingGame> {
-  late final _audioService = context.read<AudioService>();
+  late final _audioService = context.read<AudioServiceBase>();
 
   int numCords = 0;
   List leftYCords = [];
@@ -43,13 +43,13 @@ class _MatchingGameState extends State<MatchingGame> {
   double offset = 0.2;
   List completed = [];
   bool isFinished = false;
-  late bool showPinyin;
+  // TODO insert a service to store unit shared preference: showPinyin
+  bool showPinyin = false;
 
   @override
   void initState() {
     super.initState();
     _audioService.initTestPlay();
-    showPinyin = ShowPinyin.showPinyin;
     numCords = widget.wordList.length;
     leftYCords = createYCordList(numCords);
     rightYCords = createYCordList(numCords);
@@ -126,7 +126,7 @@ class _MatchingGameState extends State<MatchingGame> {
 
   @override
   Widget build(BuildContext context) {
-    final audioService = context.read<AudioService>();
+    final audioService = context.read<AudioServiceBase>();
 
     List<Widget> stackLayers = List<Widget>.generate(
       widget.wordList.length * 2,
@@ -162,19 +162,15 @@ class _MatchingGameState extends State<MatchingGame> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: () {
+                ToggleButtonsWidget(
+                  showPinyin: showPinyin,
+                  onPinyinToggle: (bool value) {
                     setState(() {
-                      showPinyin = !showPinyin;
-                      ShowPinyin.showPinyin = showPinyin;
+                      showPinyin = value;
                     });
                   },
-                  child:
-                      showPinyin
-                          ? const Text("Hide Pinyin")
-                          : const Text("Show Pinyin"),
-                ),
-              ],
+                )
+              ]
             ),
             const SizedBox(height: 30),
             const Padding(
@@ -210,7 +206,7 @@ class _MatchingGameState extends State<MatchingGame> {
                           audioService.playCorrectSound();
                           widget.callback(
                             true,
-                            WordItem(LargeText.hskMap),
+                            WordItem.fromMap(LargeText.hskMap),
                             null,
                           );
                         },

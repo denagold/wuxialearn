@@ -1,6 +1,5 @@
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 
@@ -9,7 +8,15 @@ class AudioConstants {
   static const String wrong = "assets/wrong.wav";
 }
 
-class AudioService {
+abstract class AudioServiceBase {
+  Future<void> initialize();
+  Future<void> initTestPlay();
+  Future<void> speak(String text);
+  Future<void> playCorrectSound();
+  Future<void> playWrongSound();
+}
+
+class AudioService implements AudioServiceBase {
   late final log = Logger('AudioService');
   static final AudioService _instance = AudioService._internal();
   factory AudioService() => _instance;
@@ -19,22 +26,35 @@ class AudioService {
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   // Initialize audio service
+  @override
   Future<void> initialize() async {
-    await _flutterTts.setLanguage("zh-CN");
+    try {
+      await _flutterTts.setLanguage("zh-CN");
+    }
+    catch (e) {
+      log.warning("Can't set TTS language");
+    }
   }
 
+  @override
   Future<void> initTestPlay() async {
-    // This is because of an issue on android, the first play of the player is always cut off
-    await _audioPlayer.setAsset(AudioConstants.correct);
-    await _audioPlayer.load();
-    final volume = _audioPlayer.volume;
-    await _audioPlayer.setVolume(0.0);
-    await _audioPlayer.play();
-    await _audioPlayer.stop();
-    await _audioPlayer.setVolume(volume);
+    try {
+      // This is because of an issue on android, the first play of the player is always cut off
+      await _audioPlayer.setAsset(AudioConstants.correct);
+      await _audioPlayer.load();
+      final volume = _audioPlayer.volume;
+      await _audioPlayer.setVolume(0.0);
+      await _audioPlayer.play();
+      await _audioPlayer.stop();
+      await _audioPlayer.setVolume(volume);
+    }
+    catch (e) {
+      log.warning("Can't initialize the Audio Player");
+    }
   }
 
   // Text-to-speech methods
+  @override
   Future<void> speak(String text) async {
     try {
       await _flutterTts.awaitSpeakCompletion(true);
