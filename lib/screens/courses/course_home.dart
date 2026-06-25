@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/screens/courses/hsk_course.dart';
 
 import '../settings/preferences.dart';
@@ -12,8 +13,8 @@ class CourseHome extends StatefulWidget {
 }
 
 class _CourseHomeState extends State<CourseHome> {
-  String course = Preferences.getPreference("default_course");
-  List<String> courses = Preferences.getPreference("courses");
+  String course = Preferences.getPreference(PreferenceConstants.defaultCourse);
+  List<String> courses = Preferences.getPreference(PreferenceConstants.courses);
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(

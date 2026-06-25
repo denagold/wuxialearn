@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import '../../sql/learn_sql.dart';
 import '../settings/preferences.dart';
 import 'course_view.dart';
@@ -35,7 +36,7 @@ class _CustomCourseState extends State<CustomCourse> {
     });
   }
 
-  bool allowSkipUnits = Preferences.getPreference("allow_skip_units");
+  bool allowSkipUnits = Preferences.getPreference(PreferenceConstants.allowSkipUnits);
   List<Widget> gridItems(List<Map<String, dynamic>> hskList) {
     return [
       SliverGrid(

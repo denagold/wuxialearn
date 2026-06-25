@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/review_rating.dart';
 import 'package:hsk_learner/screens/review/review_flashcards.dart';
 import 'package:hsk_learner/screens/review/review_progress.dart';
@@ -91,9 +92,9 @@ class _ReviewPageState extends State<ReviewPage> {
       ReviewSql.getReviewRatings();
   bool lastPage = false;
   int numCards = -1;
-  bool previewDeck = Preferences.getPreference("showTranslations");
+  bool previewDeck = Preferences.getPreference(PreferenceConstants.showTranslations);
   bool showPinyin = Preferences.getPreference(
-    "show_pinyin_by_default_in_review",
+    PreferenceConstants.showPinyinByDefaultInReview,
   );
   bool isCollapsed = true;
   bool deckExists = true;

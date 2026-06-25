@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:hsk_learner/screens/settings/preferences.dart';
@@ -70,9 +71,9 @@ class _UnitLearnState extends State<UnitLearn> {
     futureList = List.generate(widget.wordList.length, (i) => getUnits(i));
     getSentenceList();
     showLiteralPref = Preferences.getPreference(
-      "show_literal_meaning_in_unit_learn",
+      PreferenceConstants.showLiteralMeaningInUnitLearn,
     );
-    showExampleSentences = Preferences.getPreference("show_sentences");
+    showExampleSentences = Preferences.getPreference(PreferenceConstants.showSentences);
     _audioService.speak(widget.wordList[0].hanzi);
   }
 

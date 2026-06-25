@@ -19,6 +19,6 @@ class PreferenceConstants {
   static const String defaultHomePage = "default_home_page";
   static const String showLiteralMeaningInUnitLearn = "show_literal_meaning_in_unit_learn";
   static const String showPinyinByDefaultInReview = "show_pinyin_by_default_in_review";
-  static const String showSentence = "show_sentences";
+  static const String showSentences = "show_sentences";
   static const String showTranslations = "showTranslations";
 }

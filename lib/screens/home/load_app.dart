@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/screens/home/home_page.dart';
 import 'package:hsk_learner/sql/load_app_sql.dart';
 import 'package:hsk_learner/sql/schema_migration.dart';
@@ -30,12 +31,12 @@ class _LoadAppState extends State<LoadApp> {
     //this could cause issues if Preferences should be changed after the
     //schema migration.
     await Preferences.initPreferences();
-    final Version appVersion = Version.parse(Preferences.getPreference("app_version"));
+    final Version appVersion = Version.parse(Preferences.getPreference(PreferenceConstants.appVersion));
     final Version latestVersion = Version.parse(await _getAppVersion());
-    final bool isFirstRun = Preferences.getPreference("isFirstRun");
+    final bool isFirstRun = Preferences.getPreference(PreferenceConstants.isFirstRun);
     if(appVersion < latestVersion && !isFirstRun){
-      Preferences.setPreference(name: "app_version", value: latestVersion);
-      PreferencesSql.setPreference(name: "app_version", value: latestVersion.toString(), type: "string");
+      Preferences.setPreference(name: PreferenceConstants.appVersion, value: latestVersion);
+      PreferencesSql.setPreference(name: PreferenceConstants.appVersion, value: latestVersion.toString(), type: "string");
       await SchemaMigration.run();
       showUpdateChangesModal();
     }
@@ -50,9 +51,9 @@ class _LoadAppState extends State<LoadApp> {
   }
 
   void showUpdateChangesModal() async{
-    final Version appVersion = Version.parse(Preferences.getPreference("app_version"));
+    final Version appVersion = Version.parse(Preferences.getPreference(PreferenceConstants.appVersion));
     if(appVersion <= Version.parse("1.3.3")){
-      final bool isFirstRun = Preferences.getPreference("isFirstRun");
+      final bool isFirstRun = Preferences.getPreference(PreferenceConstants.isFirstRun);
       if(!isFirstRun) {
         showCupertinoDialog(
         context: context,
@@ -81,9 +82,9 @@ class _LoadAppState extends State<LoadApp> {
   }
 
   void init() {
-    final String currentVersion = Preferences.getPreference("db_version");
+    final String currentVersion = Preferences.getPreference(PreferenceConstants.dbVersion);
     final String latestVersion = Preferences.getPreference(
-      "latest_db_version_constant",
+      PreferenceConstants.latestDbVersionConstant,
     );
     print("currentVersion: $currentVersion");
     print("latestVersion: $latestVersion");
@@ -92,9 +93,9 @@ class _LoadAppState extends State<LoadApp> {
       //Backup.startBackupFromTempDir();
     }
     final bool check = Preferences.getPreference(
-      "check_for_new_version_on_start",
+      PreferenceConstants.checkForNewVersionOnStart,
     );
-    final bool isFirstRun = Preferences.getPreference("isFirstRun");
+    final bool isFirstRun = Preferences.getPreference(PreferenceConstants.isFirstRun);
     if (check && !isFirstRun) {
       checkForDbUpdate();
     }
@@ -108,7 +109,7 @@ class _LoadAppState extends State<LoadApp> {
     if (isLoading) {
       return const Loading();
     } else {
-      final bool isFirstRun = Preferences.getPreference("isFirstRun");
+      final bool isFirstRun = Preferences.getPreference(PreferenceConstants.isFirstRun);
       if (isFirstRun) {
         if (widget.fdroid) {
           Future.delayed(const Duration(seconds: 0)).then((_) {
@@ -116,7 +117,7 @@ class _LoadAppState extends State<LoadApp> {
           });
         } else {
           setFirstRun();
-          enableCheckForUpdate();
+          setCheckForUpdate(true);
           checkForDbUpdate();
         }
         return const MyHomePage();
@@ -137,7 +138,7 @@ class _LoadAppState extends State<LoadApp> {
                 isDefaultAction: true,
                 onPressed: () {
                   setFirstRun();
-                  enableCheckForUpdate();
+                  setCheckForUpdate(true);
                   Navigator.pop(context, true);
                   checkForDbUpdate();
                 },
@@ -147,7 +148,7 @@ class _LoadAppState extends State<LoadApp> {
                 isDefaultAction: true,
                 onPressed: () {
                   setFirstRun();
-                  disableCheckForUpdate();
+                  setCheckForUpdate(false);
                   Navigator.pop(context, true);
                 },
                 child: const Text("No"),
@@ -158,38 +159,25 @@ class _LoadAppState extends State<LoadApp> {
   }
 
   void setFirstRun() {
-    PreferencesSql.setPreference(name: "isFirstRun", value: "0", type: "bool");
-    Preferences.setPreference(name: "isFirstRun", value: false);
+    PreferencesSql.setPreference(name: PreferenceConstants.isFirstRun, value: "0", type: "bool");
+    Preferences.setPreference(name: PreferenceConstants.isFirstRun, value: false);
   }
 
-  void enableCheckForUpdate() {
+  void setCheckForUpdate(bool setState) {
     PreferencesSql.setPreference(
-      name: "check_for_new_version_on_start",
-      value: "1",
+      name: PreferenceConstants.checkForNewVersionOnStart,
+      value: setState ? "1" : "0",
       type: "bool",
     );
     Preferences.setPreference(
-      name: "check_for_new_version_on_start",
-      value: true,
-    );
-  }
-
-  void disableCheckForUpdate() {
-    PreferencesSql.setPreference(
-      name: "check_for_new_version_on_start",
-      value: "0",
-      type: "bool",
-    );
-    Preferences.setPreference(
-      name: "check_for_new_version_on_start",
-      value: false,
+      name: PreferenceConstants.checkForNewVersionOnStart,
+      value: setState,
     );
   }
 
   void checkForDbUpdate() async {
-    const String dbPref = 'db_version';
     print("checking for update");
-    final String lastVersion = Preferences.getPreference(dbPref);
+    final String lastVersion = Preferences.getPreference(PreferenceConstants.dbVersion);
     const String versionUrl =
         'https://cdn.jsdelivr.net/gh/wuxialearn/data@main/version';
     final req = await http.get(Uri.parse(versionUrl));
@@ -197,9 +185,9 @@ class _LoadAppState extends State<LoadApp> {
     //disable for this release as we will update sqlite file directly
     if (version != lastVersion && 1 == 0) {
       await LoadAppSql.updateSqliteFromCsv();
-      Preferences.setPreference(name: dbPref, value: version);
+      Preferences.setPreference(name: PreferenceConstants.dbVersion, value: version);
       PreferencesSql.setPreference(
-        name: dbPref,
+        name: PreferenceConstants.dbVersion,
         value: version,
         type: 'string',
       );

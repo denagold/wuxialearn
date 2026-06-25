@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:d4_dsv/d4_dsv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/screens/settings/preferences.dart';
 import 'package:hsk_learner/utils/platform_info.dart';
 import 'package:intl/intl.dart';
@@ -236,15 +237,15 @@ final class Backup {
       return false;
     }
     final latestVersion = Preferences.getPreference(
-      "latest_db_version_constant",
+      PreferenceConstants.latestDbVersionConstant,
     );
-    Preferences.setPreference(name: "db_version", value: latestVersion);
+    Preferences.setPreference(name: PreferenceConstants.dbVersion, value: latestVersion);
     PreferencesSql.setPreference(
-      name: "db_version",
+      name: PreferenceConstants.dbVersion,
       value: latestVersion,
       type: "string",
     );
-    final currVersion = Preferences.getPreference("db_version");
+    final currVersion = Preferences.getPreference(PreferenceConstants.dbVersion);
     print(latestVersion);
     print(currVersion);
     print(latestVersion == currVersion);

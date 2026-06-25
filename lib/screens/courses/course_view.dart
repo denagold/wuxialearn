@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 
 import '../learn/unit_view.dart';
 import '../settings/preferences.dart';
@@ -24,7 +25,7 @@ class CourseView extends StatefulWidget {
 }
 
 class _CourseViewState extends State<CourseView> {
-  List<String> courses = Preferences.getPreference("courses");
+  List<String> courses = Preferences.getPreference(PreferenceConstants.courses);
   late int hskLevel;
   @override
   Widget build(BuildContext context) {
@@ -112,7 +113,7 @@ class _CourseViewState extends State<CourseView> {
                   Navigator.pop(context);
                   if (courses[index] != widget.courseName) {
                     final allowSkipUnits = Preferences.getPreference(
-                      "allow_skip_units",
+                      PreferenceConstants.allowSkipUnits,
                     );
                     var allowedChangeCourse = hskLevel > 2 || allowSkipUnits;
                     if (allowedChangeCourse) {

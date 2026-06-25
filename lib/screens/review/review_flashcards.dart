@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/review_rating.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/stats/character_view.dart';
@@ -41,7 +42,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
   bool lastPage = false;
   bool wasClicked = false;
   bool showPinyin = Preferences.getPreference(
-    "show_pinyin_by_default_in_review",
+    PreferenceConstants.showPinyinByDefaultInReview,
   );
   bool showHint = false;
   bool showShowHint = false;

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/learn/unit_learn.dart';
 import 'package:hsk_learner/service/audio_service.dart';
@@ -37,8 +38,8 @@ class SubunitView extends StatefulWidget {
 class _SubunitViewState extends State<SubunitView> {
   late final _audioService = context.read<AudioServiceBase>();
   late Future<List<Map<String, dynamic>>> sentenceList;
-  final bool debug = Preferences.getPreference("debug");
-  final bool allowSkipUnits = Preferences.getPreference("allow_skip_units");
+  final bool debug = Preferences.getPreference(PreferenceConstants.debug);
+  final bool allowSkipUnits = Preferences.getPreference(PreferenceConstants.allowSkipUnits);
 
   @override
   void initState() {

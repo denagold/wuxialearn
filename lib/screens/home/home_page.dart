@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/screens/courses/course_home.dart';
 import 'package:hsk_learner/screens/review/review_home.dart';
 import 'package:hsk_learner/screens/settings/preferences.dart';
@@ -21,7 +22,7 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  final String s = Preferences.getPreference("default_home_page");
+  final String s = Preferences.getPreference(PreferenceConstants.defaultHomePage);
   int tabsIndex = 0;
   late List<Widget> tabList = [];
   DateTime lastBackPress = DateTime.utc(1960);

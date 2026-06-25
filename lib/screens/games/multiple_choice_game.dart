@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:hsk_learner/service/audio_service.dart';
@@ -210,7 +211,7 @@ class _AnswersListState extends State<AnswersList> {
   @override
   void initState() {
     super.initState();
-    bool debug = Preferences.getPreference("debug");
+    bool debug = Preferences.getPreference(PreferenceConstants.debug);
     final groupWordsCopy = List.generate(
       widget.wordList.length,
       (index) => widget.wordList[index],

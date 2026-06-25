@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/service/audio_service.dart';
 import 'package:hsk_learner/utils/large_text.dart';
@@ -53,7 +54,7 @@ class _MatchingGameState extends State<MatchingGame> {
     numCords = widget.wordList.length;
     leftYCords = createYCordList(numCords);
     rightYCords = createYCordList(numCords);
-    bool debug = Preferences.getPreference("debug");
+    bool debug = Preferences.getPreference(PreferenceConstants.debug);
     if (!debug) {
       leftYCords.shuffle();
       rightYCords.shuffle();

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/sql/pg_update.dart';
 import 'package:hsk_learner/sql/preferences_sql.dart';
 import 'package:hsk_learner/sql/sql_helper.dart';
@@ -18,26 +19,26 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  bool translation = Preferences.getPreference("showTranslations");
+  bool translation = Preferences.getPreference(PreferenceConstants.showTranslations);
   bool reviewPinyin = Preferences.getPreference(
-    "show_pinyin_by_default_in_review",
+    PreferenceConstants.showPinyinByDefaultInReview,
   );
   bool checkVersionOnStart = Preferences.getPreference(
-    "check_for_new_version_on_start",
+    PreferenceConstants.checkForNewVersionOnStart,
   );
-  bool debug = Preferences.getPreference("debug");
-  bool allowSkipUnits = Preferences.getPreference("allow_skip_units");
-  bool showExampleSentences = Preferences.getPreference("show_sentences");
+  bool debug = Preferences.getPreference(PreferenceConstants.debug);
+  bool allowSkipUnits = Preferences.getPreference(PreferenceConstants.allowSkipUnits);
+  bool showExampleSentences = Preferences.getPreference(PreferenceConstants.showSentences);
   bool allowAutoComplete = Preferences.getPreference(
-    "allow_auto_complete_unit",
+    PreferenceConstants.allowAutoCompleteUnit,
   );
   bool showLiteralInUnitLearn = Preferences.getPreference(
-    "show_literal_meaning_in_unit_learn",
+    PreferenceConstants.showLiteralMeaningInUnitLearn,
   );
-  List<String> courses = Preferences.getPreference("courses");
+  List<String> courses = Preferences.getPreference(PreferenceConstants.courses);
   List<String> homePages = ["home", "review", "stats"];
-  String defaultCourse = Preferences.getPreference("default_course");
-  String defaultHomePage = Preferences.getPreference("default_home_page");
+  String defaultCourse = Preferences.getPreference(PreferenceConstants.defaultCourse);
+  String defaultHomePage = Preferences.getPreference(PreferenceConstants.defaultHomePage);
   String version = '1.0.13';
   int clicks = 0;
   bool showDebugOptions = false;
@@ -84,13 +85,13 @@ class _SettingsState extends State<Settings> {
                 isDefaultAction: true,
                 onPressed: () {
                   setSettingString(
-                    name: 'default_course',
+                    name: PreferenceConstants.defaultCourse,
                     type: 'string',
                     value: courses[index],
                   );
                   Navigator.pop(context, true);
                   setState(() {
-                    defaultCourse = Preferences.getPreference("default_course");
+                    defaultCourse = Preferences.getPreference(PreferenceConstants.defaultCourse);
                   });
                 },
                 child: Text(courses[index]),
@@ -114,14 +115,14 @@ class _SettingsState extends State<Settings> {
                   isDefaultAction: true,
                   onPressed: () {
                     setSettingString(
-                      name: 'default_home_page',
+                      name: PreferenceConstants.defaultHomePage,
                       type: 'string',
                       value: homePages[index],
                     );
                     Navigator.pop(context, true);
                     setState(() {
                       defaultHomePage = Preferences.getPreference(
-                        "default_home_page",
+                        PreferenceConstants.defaultHomePage,
                       );
                     });
                   },
@@ -200,7 +201,7 @@ class _SettingsState extends State<Settings> {
                         activeTrackColor: CupertinoColors.activeBlue,
                         onChanged: (bool value) {
                           setSettingBool(
-                            name: "showTranslations",
+                            name: PreferenceConstants.showTranslations,
                             type: "bool",
                             value: value,
                           );
@@ -219,7 +220,7 @@ class _SettingsState extends State<Settings> {
                         activeTrackColor: CupertinoColors.activeBlue,
                         onChanged: (bool value) {
                           setSettingBool(
-                            name: "show_pinyin_by_default_in_review",
+                            name: PreferenceConstants.showPinyinByDefaultInReview,
                             type: "bool",
                             value: value,
                           );
@@ -243,7 +244,7 @@ class _SettingsState extends State<Settings> {
                         activeTrackColor: CupertinoColors.activeBlue,
                         onChanged: (bool value) {
                           setSettingBool(
-                            name: "show_sentences",
+                            name: PreferenceConstants.showSentences,
                             type: "bool",
                             value: value,
                           );
@@ -262,7 +263,7 @@ class _SettingsState extends State<Settings> {
                         activeTrackColor: CupertinoColors.activeBlue,
                         onChanged: (bool value) {
                           setSettingBool(
-                            name: "show_literal_meaning_in_unit_learn",
+                            name: PreferenceConstants.showLiteralMeaningInUnitLearn,
                             type: "bool",
                             value: value,
                           );
@@ -506,7 +507,7 @@ class _SettingsState extends State<Settings> {
                           activeTrackColor: CupertinoColors.activeBlue,
                           onChanged: (bool value) {
                             setSettingBool(
-                              name: "debug",
+                              name: PreferenceConstants.debug,
                               type: "bool",
                               value: value,
                             );
@@ -525,7 +526,7 @@ class _SettingsState extends State<Settings> {
                           activeTrackColor: CupertinoColors.activeBlue,
                           onChanged: (bool value) {
                             setSettingBool(
-                              name: "allow_skip_units",
+                              name: PreferenceConstants.allowSkipUnits,
                               type: "bool",
                               value: value,
                             );
@@ -544,7 +545,7 @@ class _SettingsState extends State<Settings> {
                           activeTrackColor: CupertinoColors.activeBlue,
                           onChanged: (bool value) {
                             setSettingBool(
-                              name: "check_for_new_version_on_start",
+                              name: PreferenceConstants.checkForNewVersionOnStart,
                               type: "bool",
                               value: value,
                             );
@@ -563,7 +564,7 @@ class _SettingsState extends State<Settings> {
                           activeTrackColor: CupertinoColors.activeBlue,
                           onChanged: (bool value) {
                             setSettingBool(
-                              name: "allow_auto_complete_unit",
+                              name: PreferenceConstants.allowAutoCompleteUnit,
                               type: "bool",
                               value: value,
                             );

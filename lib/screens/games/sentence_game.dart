@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +74,7 @@ class _SentenceGameState extends State<SentenceGame> {
     //pinyin = widget.currSentence["pinyin"].split(" ");
     showPinyin = ShowPinyin.showPinyin;
     super.initState();
-    bool debug = Preferences.getPreference("debug");
+    bool debug = Preferences.getPreference(PreferenceConstants.debug);
     if (!debug) {
       Random random = Random();
       int length = words.length;
