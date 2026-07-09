@@ -1,169 +1,156 @@
-import 'package:hsk_learner/constants/preference_constants.dart';
+import 'dart:convert';
+
 import 'package:hsk_learner/sql/preferences_sql.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logging/logging.dart';
 
 abstract class PreferencesServiceBase {
+  Future<void> init();
+
   dynamic getPreference({required String key});
-  Future<void> setPreference({required String key, required dynamic value});
+  void setPreference({required String key, required dynamic value});
 
-  Future<void> setPreferenceBool({required String key, required bool value});
-  Future<void> setPreferenceInt({required String key, required int value});
-  Future<void> setPreferenceDouble({required String key, required double value});
-  Future<void> setPreferenceString({required String key, required String value});
+  void setPreferenceBool({required String key, required bool value});
+  void setPreferenceInt({required String key, required int value});
+  void setPreferenceDouble({required String key, required double value});
+  void setPreferenceString({required String key, required String value});
+  void setPreferenceJson({required String key, required String value});
 
-  Future<bool?> getPreferenceBool({required String key});
-  Future<int?> getPreferenceInt({required String key});
-  Future<double?> getPreferenceDouble({required String key});
-  Future<String?> getPreferenceString({required String key});
+  bool? getPreferenceBool({required String key});
+  int? getPreferenceInt({required String key});
+  double? getPreferenceDouble({required String key});
+  String? getPreferenceString({required String key});
+  List<String>? getPreferenceStringList({required String key});
 
-  Future<bool> hasPreference(String key);
+  bool hasPreference(String key);
 }
 
 class PreferencesService implements PreferencesServiceBase {
-  late SharedPreferencesWithCache _prefStore;
-  late final log = Logger('PreferencesService');
+  static final log = Logger('PreferencesService');
 
-  Future<void> constructor() async {
-    _prefStore = await SharedPreferencesWithCache.create(
-      cacheOptions: const SharedPreferencesWithCacheOptions(
-        allowList: <String>{
-          PreferenceConstants.allowAutoCompleteUnit,
-          PreferenceConstants.allowSkipUnits,
-          PreferenceConstants.appVersion,
-          PreferenceConstants.checkForNewVersionOnStart,
-          PreferenceConstants.courses,
-          PreferenceConstants.dbVersion,
-          PreferenceConstants.debug,
-          PreferenceConstants.defaultCourse,
-          PreferenceConstants.defaultHomePage,
-          PreferenceConstants.isFirstRun,
-          PreferenceConstants.showLiteralMeaningInUnitLearn,
-          PreferenceConstants.showPinyinByDefaultInReview,
-          PreferenceConstants.showSentence,
-          PreferenceConstants.showTranslations,
-        },
-    ));
+  final SharedPreferencesWithCache prefs;
+
+  PreferencesService(this.prefs);
+
+  @override
+  Future<void> init() async {
+    await loadPreferences();
   }
 
   @override
-  Future<void> setPreference({required String key, required dynamic value}) async {
-    // Use appropriate setter based on value type
+  void setPreference({required String key, required dynamic value}) {
     if (value is int) {
-      await _prefStore.setInt(key, value);
+      prefs.setInt(key, value);
     } else if (value is String) {
-      await _prefStore.setString(key, value);
+      prefs.setString(key, value);
     } else if (value is bool) {
-      await _prefStore.setBool(key, value);
+      prefs.setBool(key, value);
     } else if (value is double) {
-      await _prefStore.setDouble(key, value);
+      prefs.setDouble(key, value);
     } else if (value is List<String>) {
-      await _prefStore.setStringList(key, value);
+      prefs.setStringList(key, value);
     } else {
-      // For complex objects, serialize to JSON
-      await _prefStore.setString(key, value.toString());
+      prefs.setString(key, value.toString());
     }
   }
 
   @override
-  dynamic getPreference({required String key}) async {
-    if (!_prefStore.containsKey(key)) {
-      // TODO Try to load from database if not in memory
-      return null;
+  dynamic getPreference({required String key}) {
+    if (!prefs.containsKey(key)) return null;
+    return prefs.get(key);
+  }
+
+  @override
+  bool hasPreference(String key) {
+    return prefs.containsKey(key);
+  }
+
+  @override
+  void setPreferenceBool({required String key, required bool value}) {
+    prefs.setBool(key, value);
+  }
+
+  @override
+  void setPreferenceDouble({required String key, required double value}) {
+    prefs.setDouble(key, value);
+  }
+
+  @override
+  void setPreferenceInt({required String key, required int value}) {
+    prefs.setInt(key, value);
+  }
+
+  @override
+  void setPreferenceString({required String key, required String value}) {
+    prefs.setString(key, value);
+  }
+
+  @override
+  void setPreferenceJson({required String key, required String value}) {
+    // Lets just think of it as a list with strings - as its only used for that
+    var data = json.decode(value);
+    var array = data as List<dynamic>;
+
+    if (data.isNotEmpty){
+      var parsedList = <String>[];
+      for (int i = 0; i < data.length; i++) {
+          var castedValue = data[i].toString();
+          parsedList.insert(i, castedValue);
+      }
+      prefs.setStringList(key, parsedList);
     }
-    return _prefStore.get(key);
-  }
-
-  // TODO contains check to mitigate ArgumentException when trying to get non-existent preference
-
-  @override
-  Future<bool> hasPreference(String key) async {
-    return _prefStore.containsKey(key);
   }
 
   @override
-  Future<void> setPreferenceBool({required String key, required bool value}) async {
-    if(!_prefStore.containsKey(key)) {
-      // TODO Try to load from database default
-      return;
-    }
-    await _prefStore.setBool(key, value);
+  bool? getPreferenceBool({required String key}) {
+    return prefs.getBool(key);
   }
 
   @override
-  Future<void> setPreferenceDouble({required String key, required double value}) async {
-    if(!_prefStore.containsKey(key)) {
-      // TODO Try to load from database default
-      return;
-    }
-    await _prefStore.setDouble(key, value);
+  double? getPreferenceDouble({required String key}) {
+    return prefs.getDouble(key);
   }
 
   @override
-  Future<void> setPreferenceInt({required String key, required int value}) async {
-    if(!_prefStore.containsKey(key)) {
-      // TODO Try to load from database default
-      return;
-    }
-    await _prefStore.setInt(key, value);
+  int? getPreferenceInt({required String key}) {
+    return prefs.getInt(key);
   }
 
   @override
-  Future<void> setPreferenceString({required String key, required String value}) async {
-    if(!_prefStore.containsKey(key)) {
-      // TODO Try to load from database default
-      return;
-    }
-    await _prefStore.setString(key, value);
+  String? getPreferenceString({required String key}) {
+    return prefs.getString(key);
   }
 
   @override
-  Future<bool?> getPreferenceBool({required String key}) async {
-    return _prefStore.getBool(key);
-  }
-
-  @override
-  Future<double?> getPreferenceDouble({required String key}) async {
-    return _prefStore.getDouble(key);
-  }
-
-  @override
-  Future<int?> getPreferenceInt({required String key}) async {
-    return _prefStore.getInt(key);
-  }
-
-  @override
-  Future<String?> getPreferenceString({required String key}) async {
-    return _prefStore.getString(key);
+  List<String>? getPreferenceStringList({required String key}) {
+    return prefs.getStringList(key);
   }
 
 
-  void loadPreferences() async {
-    // Load preferences from database if available
+  Future<void> loadPreferences() async {
     var listOfPreferences = await PreferencesSql.getPreferences();
-    for(var map in listOfPreferences) {
-      switch (map['type']) {
+    for (var map in listOfPreferences) {
+      final name = map['name'] as String;
+      final value = map['value'] as String;
+      switch (map['type'] as String) {
         case 'bool':
-          await setPreferenceBool(key: map['name'], value: map['value']);
+          setPreferenceBool(
+              key: name, value: value == '1' || value.toLowerCase() == 'true');
           break;
         case 'double':
-          await setPreferenceDouble(key: map['name'], value: map['value']);
+          setPreferenceDouble(key: name, value: double.parse(value));
           break;
         case 'int':
-          await setPreferenceInt(key: map['name'], value: map['value']);
+          setPreferenceInt(key: name, value: int.parse(value));
           break;
         case 'string':
-          await setPreferenceString(key: map['name'], value: map['value']);
+          setPreferenceString(key: name, value: value);
+        case 'json':
+          // TODO:  make proper json parsing or rather remove this type as possibility
+          setPreferenceJson(key: name, value: value);
         default:
-          throw Exception('Unknown preference type');
+          log.severe('Unknown preference type: ${map['type']} for key: $name');
       }
     }
   }
-
-  void migratePreferences() async {
-    // Migrate preferences to new format if necessary
-
-  }
-
 }
-

@@ -4,9 +4,9 @@ import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:hsk_learner/service/audio_service.dart';
+import 'package:hsk_learner/service/preferences_service.dart';
 import 'dart:math';
 import 'package:provider/provider.dart';
-import '../settings/preferences.dart';
 import '../../utils/styles.dart';
 
 class ChineseToEnglishGame extends StatefulWidget {
@@ -206,12 +206,13 @@ class AnswersList extends StatefulWidget {
 }
 
 class _AnswersListState extends State<AnswersList> {
+  late final prefs = context.read<PreferencesServiceBase>();
   late List<WordItem> buttonSelectionWords;
   bool clicked = false;
   @override
   void initState() {
     super.initState();
-    bool debug = Preferences.getPreference(PreferenceConstants.debug);
+    bool debug = prefs.getPreference(key: PreferenceConstants.debug);
     final groupWordsCopy = List.generate(
       widget.wordList.length,
       (index) => widget.wordList[index],

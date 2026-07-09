@@ -15,10 +15,18 @@ class PreferenceConstants {
   static const String courses = "courses";
 
   // Setting constants default constants
+  static const String theme = "theme";
   static const String defaultCourse = "default_course";
   static const String defaultHomePage = "default_home_page";
   static const String showLiteralMeaningInUnitLearn = "show_literal_meaning_in_unit_learn";
   static const String showPinyinByDefaultInReview = "show_pinyin_by_default_in_review";
   static const String showSentences = "show_sentences";
   static const String showTranslations = "showTranslations";
+  static const String isCharacterStrokeDataDownloaded = "character_stroke_data_downloaded";
+
+  // Review words
+  static const String reviewType = "reviewType";
+  static const String reviewWords = "reviewWords";
+  static const String deckSize = "deckSize";
+  static const String deckName = "deckName";
 }

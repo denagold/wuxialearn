@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
+import 'package:hsk_learner/service/preferences_service.dart';
+import 'package:provider/provider.dart';
 import '../../sql/learn_sql.dart';
-import '../settings/preferences.dart';
 import 'course_view.dart';
 
 class CustomCourse extends StatefulWidget {
@@ -18,6 +19,7 @@ class CustomCourse extends StatefulWidget {
 }
 
 class _CustomCourseState extends State<CustomCourse> {
+  late final prefs = context.read<PreferencesServiceBase>();
   late Future<List<Map<String, dynamic>>> unitNumList;
   @override
   void initState() {
@@ -36,7 +38,7 @@ class _CustomCourseState extends State<CustomCourse> {
     });
   }
 
-  bool allowSkipUnits = Preferences.getPreference(PreferenceConstants.allowSkipUnits);
+  late bool allowSkipUnits = prefs.getPreference(key: PreferenceConstants.allowSkipUnits);
   List<Widget> gridItems(List<Map<String, dynamic>> hskList) {
     return [
       SliverGrid(

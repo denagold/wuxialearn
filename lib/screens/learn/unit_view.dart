@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/learn/subunit_view.dart';
+import 'package:hsk_learner/service/preferences_service.dart';
+import 'package:provider/provider.dart';
 import '../../sql/learn_sql.dart';
 import '../../sql/manage_review_sql.dart';
 import '../../sql/stats_sql.dart';
-import '../settings/preferences.dart';
 
 class UnitView extends StatefulWidget {
   final int unit;
@@ -26,10 +27,12 @@ class UnitView extends StatefulWidget {
 }
 
 class _UnitViewState extends State<UnitView> {
+  late final prefs = context.read<PreferencesServiceBase>();
+
   late Future<List<Map<String, dynamic>>> hskFuture;
   late Future<List<Map<String, dynamic>>> sentencesFuture;
   late Future<List<Map<String, dynamic>>> subunitFuture;
-  final bool debug = Preferences.getPreference(PreferenceConstants.debug);
+  late final bool debug = prefs.getPreference(key: PreferenceConstants.debug);
   final bool allowAutoComplete = true;
 
   @override

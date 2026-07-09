@@ -4,11 +4,11 @@ import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/learn/unit_learn.dart';
 import 'package:hsk_learner/service/audio_service.dart';
+import 'package:hsk_learner/service/preferences_service.dart';
 import 'package:provider/provider.dart';
 import '../../sql/learn_sql.dart';
 import '../../widgets/hsk_listview/hsk_listview.dart';
 import '../games/unit_game.dart';
-import '../settings/preferences.dart';
 
 class SubunitView extends StatefulWidget {
   const SubunitView({
@@ -36,10 +36,11 @@ class SubunitView extends StatefulWidget {
 }
 
 class _SubunitViewState extends State<SubunitView> {
+  late final prefs = context.read<PreferencesServiceBase>();
   late final _audioService = context.read<AudioServiceBase>();
   late Future<List<Map<String, dynamic>>> sentenceList;
-  final bool debug = Preferences.getPreference(PreferenceConstants.debug);
-  final bool allowSkipUnits = Preferences.getPreference(PreferenceConstants.allowSkipUnits);
+  late final bool debug = prefs.getPreference(key: PreferenceConstants.debug);
+  late final bool allowSkipUnits = prefs.getPreference(key: PreferenceConstants.allowSkipUnits);
 
   @override
   void initState() {

@@ -2,12 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/sql/pg_update.dart';
-import 'package:hsk_learner/sql/preferences_sql.dart';
 import 'package:hsk_learner/sql/sql_helper.dart';
+import 'package:provider/provider.dart';
+import '../../service/preferences_service.dart';
 import '../../sql/character_stokes_sql.dart';
 import '../../utils/platform_info.dart';
 import 'backup.dart';
-import 'preferences.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:flutter/services.dart';
 
@@ -19,56 +19,82 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  bool translation = Preferences.getPreference(PreferenceConstants.showTranslations);
-  bool reviewPinyin = Preferences.getPreference(
-    PreferenceConstants.showPinyinByDefaultInReview,
-  );
-  bool checkVersionOnStart = Preferences.getPreference(
-    PreferenceConstants.checkForNewVersionOnStart,
-  );
-  bool debug = Preferences.getPreference(PreferenceConstants.debug);
-  bool allowSkipUnits = Preferences.getPreference(PreferenceConstants.allowSkipUnits);
-  bool showExampleSentences = Preferences.getPreference(PreferenceConstants.showSentences);
-  bool allowAutoComplete = Preferences.getPreference(
-    PreferenceConstants.allowAutoCompleteUnit,
-  );
-  bool showLiteralInUnitLearn = Preferences.getPreference(
-    PreferenceConstants.showLiteralMeaningInUnitLearn,
-  );
-  List<String> courses = Preferences.getPreference(PreferenceConstants.courses);
+  late final _preferencesService = context.read<PreferencesServiceBase>();
+
+  late bool translation;
+  late bool reviewPinyin;
+  late bool checkVersionOnStart;
+  late bool debug;
+  late bool allowSkipUnits;
+  late bool showExampleSentences;
+  late bool allowAutoComplete;
+  late bool showLiteralInUnitLearn;
+  late List<String> courses;
+  late String defaultCourse;
+  late String defaultHomePage;
+  late bool isDataDownloaded;
+  late String theme;
   List<String> homePages = ["home", "review", "stats"];
-  String defaultCourse = Preferences.getPreference(PreferenceConstants.defaultCourse);
-  String defaultHomePage = Preferences.getPreference(PreferenceConstants.defaultHomePage);
   String version = '1.0.13';
   int clicks = 0;
   bool showDebugOptions = false;
   bool isDownloading = false;
   bool isDeleting = false;
-  bool isDataDownloaded =
-      SharedPrefs.prefs.getBool('character_stroke_data_downloaded') ?? false;
 
   @override
   void initState() {
     super.initState();
+    translation = _preferencesService.getPreference(
+      key: PreferenceConstants.showTranslations,
+    ) ?? false;
+    reviewPinyin = _preferencesService.getPreference(
+      key: PreferenceConstants.showPinyinByDefaultInReview,
+    ) ?? false;
+    checkVersionOnStart = _preferencesService.getPreference(
+      key: PreferenceConstants.checkForNewVersionOnStart,
+    ) ?? false;
+    debug = _preferencesService.getPreference(
+      key: PreferenceConstants.debug,
+    ) ?? false;
+    allowSkipUnits = _preferencesService.getPreference(
+      key: PreferenceConstants.allowSkipUnits,
+    ) ?? false;
+    showExampleSentences = _preferencesService.getPreference(
+      key: PreferenceConstants.showSentences,
+    ) ?? false;
+    allowAutoComplete = _preferencesService.getPreference(
+      key: PreferenceConstants.allowAutoCompleteUnit,
+    ) ?? false;
+    showLiteralInUnitLearn = _preferencesService.getPreference(
+      key: PreferenceConstants.showLiteralMeaningInUnitLearn,
+    ) ?? false;
+    courses = _preferencesService.getPreference(
+      key: PreferenceConstants.courses,
+    ) ?? [];
+    defaultCourse = _preferencesService.getPreference(
+      key: PreferenceConstants.defaultCourse,
+    ) ?? '';
+    defaultHomePage = _preferencesService.getPreference(
+      key: PreferenceConstants.defaultHomePage,
+    ) ?? '';
+    isDataDownloaded = _preferencesService.getPreference(
+      key: 'character_stroke_data_downloaded',
+    ) ?? false;
+    theme = _preferencesService.getPreference(key: 'theme') ?? 'system';
   }
 
   setSettingBool({
     required String name,
-    required String type,
     required bool value,
   }) {
-    String val = value == true ? "1" : "0";
-    PreferencesSql.setPreference(name: name, value: val, type: type);
-    Preferences.setPreference(name: name, value: value);
+    _preferencesService.setPreference(key: name, value: value);
   }
 
   setSettingString({
     required String name,
-    required String type,
     required String value,
   }) {
-    PreferencesSql.setPreference(name: name, value: value, type: type);
-    Preferences.setPreference(name: name, value: value);
+    _preferencesService.setPreference(key: name, value: value);
   }
 
   _showDefaultCourseActionSheet<bool>(BuildContext context) {
@@ -76,7 +102,6 @@ class _SettingsState extends State<Settings> {
       context: context,
       builder:
           (BuildContext context) => CupertinoActionSheet(
-            //title: const Text('Courses'),
             title: const Text('Select a default course'),
             actions: List<CupertinoActionSheetAction>.generate(courses.length, (
               index,
@@ -86,12 +111,11 @@ class _SettingsState extends State<Settings> {
                 onPressed: () {
                   setSettingString(
                     name: PreferenceConstants.defaultCourse,
-                    type: 'string',
                     value: courses[index],
                   );
                   Navigator.pop(context, true);
                   setState(() {
-                    defaultCourse = Preferences.getPreference(PreferenceConstants.defaultCourse);
+                    defaultCourse = _preferencesService.getPreference(key: PreferenceConstants.defaultCourse)!;
                   });
                 },
                 child: Text(courses[index]),
@@ -106,7 +130,6 @@ class _SettingsState extends State<Settings> {
       context: context,
       builder:
           (BuildContext context) => CupertinoActionSheet(
-            //title: const Text('Courses'),
             title: const Text('Select a default home page'),
             actions: List<CupertinoActionSheetAction>.generate(
               homePages.length,
@@ -116,14 +139,11 @@ class _SettingsState extends State<Settings> {
                   onPressed: () {
                     setSettingString(
                       name: PreferenceConstants.defaultHomePage,
-                      type: 'string',
                       value: homePages[index],
                     );
                     Navigator.pop(context, true);
                     setState(() {
-                      defaultHomePage = Preferences.getPreference(
-                        PreferenceConstants.defaultHomePage,
-                      );
+                      defaultHomePage = homePages[index];
                     });
                   },
                   child: Text(homePages[index]),
@@ -143,25 +163,25 @@ class _SettingsState extends State<Settings> {
             actions: [
               CupertinoActionSheetAction(
                 onPressed: () {
-                  SharedPrefs.prefs.setString('theme', 'light');
+                  setSettingString(name: 'theme', value: 'light');
+                  setState(() => theme = 'light');
                   Navigator.pop(context);
-                  setState(() {});
                 },
                 child: const Text('Light'),
               ),
               CupertinoActionSheetAction(
                 onPressed: () {
-                  SharedPrefs.prefs.setString('theme', 'dark');
+                  setSettingString(name: 'theme', value: 'dark');
+                  setState(() => theme = 'dark');
                   Navigator.pop(context);
-                  setState(() {});
                 },
                 child: const Text('Dark'),
               ),
               CupertinoActionSheetAction(
                 onPressed: () {
-                  SharedPrefs.prefs.setString('theme', 'system');
+                  setSettingString(name: 'theme', value: 'system');
+                  setState(() => theme = 'system');
                   Navigator.pop(context);
-                  setState(() {});
                 },
                 child: const Text('System'),
               ),
@@ -196,13 +216,11 @@ class _SettingsState extends State<Settings> {
                     children: [
                       const Text("Show translations in preview"),
                       CupertinoSwitch(
-                        // This bool value toggles the switch.
                         value: translation,
                         activeTrackColor: CupertinoColors.activeBlue,
                         onChanged: (bool value) {
                           setSettingBool(
                             name: PreferenceConstants.showTranslations,
-                            type: "bool",
                             value: value,
                           );
                           setState(() => translation = value);
@@ -215,13 +233,11 @@ class _SettingsState extends State<Settings> {
                     children: [
                       const Text("Show pinyin by default"),
                       CupertinoSwitch(
-                        // This bool value toggles the switch.
                         value: reviewPinyin,
                         activeTrackColor: CupertinoColors.activeBlue,
                         onChanged: (bool value) {
                           setSettingBool(
                             name: PreferenceConstants.showPinyinByDefaultInReview,
-                            type: "bool",
                             value: value,
                           );
                           setState(() => reviewPinyin = value);
@@ -239,13 +255,11 @@ class _SettingsState extends State<Settings> {
                     children: [
                       const Text("Show example sentences in unit learn"),
                       CupertinoSwitch(
-                        // This bool value toggles the switch.
                         value: showExampleSentences,
                         activeTrackColor: CupertinoColors.activeBlue,
                         onChanged: (bool value) {
                           setSettingBool(
                             name: PreferenceConstants.showSentences,
-                            type: "bool",
                             value: value,
                           );
                           setState(() => showExampleSentences = value);
@@ -258,13 +272,11 @@ class _SettingsState extends State<Settings> {
                     children: [
                       const Text("Show literal meaning in unit learn"),
                       CupertinoSwitch(
-                        // This bool value toggles the switch.
                         value: showLiteralInUnitLearn,
                         activeTrackColor: CupertinoColors.activeBlue,
                         onChanged: (bool value) {
                           setSettingBool(
                             name: PreferenceConstants.showLiteralMeaningInUnitLearn,
-                            type: "bool",
                             value: value,
                           );
                           setState(() => showLiteralInUnitLearn = value);
@@ -309,9 +321,7 @@ class _SettingsState extends State<Settings> {
                         onPressed: () {
                           _showThemeSelectionDialog(context);
                         },
-                        child: Text(switch (SharedPrefs.prefs.getString(
-                          'theme',
-                        )) {
+                        child: Text(switch (theme) {
                           "dark" => "Dark",
                           "light" => "Light",
                           _ => "System",
@@ -335,51 +345,52 @@ class _SettingsState extends State<Settings> {
                                 isDataDownloaded
                                     ? null
                                     : () async {
-                                      setState(() {
-                                        isDownloading = true;
-                                      });
-                                      CharacterStokesSql.createTable()
-                                          .then(
-                                            (value) {
-                                              SharedPrefs.prefs.setBool(
-                                                'character_stroke_data_downloaded',
-                                                true,
-                                              );
+                                        setState(() {
+                                          isDownloading = true;
+                                        });
+                                        CharacterStokesSql.createTable()
+                                            .then(
+                                              (value) {
+                                                setSettingBool(
+                                                  name:
+                                                      'character_stroke_data_downloaded',
+                                                  value: true,
+                                                );
+                                                setState(() {
+                                                  isDataDownloaded = true;
+                                                });
+                                                showCupertinoDialog(
+                                                  barrierDismissible: true,
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return const CupertinoAlertDialog(
+                                                      content: Text(
+                                                        "Download succeeded",
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                              onError: (e) {
+                                                showCupertinoDialog(
+                                                  barrierDismissible: true,
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return const CupertinoAlertDialog(
+                                                      content: Text(
+                                                        "Download failed",
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                            )
+                                            .whenComplete(() {
                                               setState(() {
-                                                isDataDownloaded = true;
+                                                isDownloading = false;
                                               });
-                                              showCupertinoDialog(
-                                                barrierDismissible: true,
-                                                context: context,
-                                                builder: (context) {
-                                                  return const CupertinoAlertDialog(
-                                                    content: Text(
-                                                      "Download succeeded",
-                                                    ),
-                                                  );
-                                                },
-                                              );
-                                            },
-                                            onError: (e) {
-                                              showCupertinoDialog(
-                                                barrierDismissible: true,
-                                                context: context,
-                                                builder: (context) {
-                                                  return const CupertinoAlertDialog(
-                                                    content: Text(
-                                                      "Download failed",
-                                                    ),
-                                                  );
-                                                },
-                                              );
-                                            },
-                                          )
-                                          .whenComplete(() {
-                                            setState(() {
-                                              isDownloading = false;
                                             });
-                                          });
-                                    },
+                                      },
                             child: const Text("Download"),
                           ),
                           if (isDownloading) const CupertinoActivityIndicator(),
@@ -390,7 +401,6 @@ class _SettingsState extends State<Settings> {
                 ],
               ),
               Visibility(
-                //disabled for ios as it is currently not working
                 visible: !PlatformInfo.isIOs(),
                 child: Column(
                   children: [
@@ -502,13 +512,11 @@ class _SettingsState extends State<Settings> {
                       children: [
                         const Text("debug mode"),
                         CupertinoSwitch(
-                          // This bool value toggles the switch.
                           value: debug,
                           activeTrackColor: CupertinoColors.activeBlue,
                           onChanged: (bool value) {
                             setSettingBool(
                               name: PreferenceConstants.debug,
-                              type: "bool",
                               value: value,
                             );
                             setState(() => debug = value);
@@ -521,13 +529,11 @@ class _SettingsState extends State<Settings> {
                       children: [
                         const Text("allow skip units"),
                         CupertinoSwitch(
-                          // This bool value toggles the switch.
                           value: allowSkipUnits,
                           activeTrackColor: CupertinoColors.activeBlue,
                           onChanged: (bool value) {
                             setSettingBool(
                               name: PreferenceConstants.allowSkipUnits,
-                              type: "bool",
                               value: value,
                             );
                             setState(() => allowSkipUnits = value);
@@ -540,13 +546,11 @@ class _SettingsState extends State<Settings> {
                       children: [
                         const Text("check for new version on start"),
                         CupertinoSwitch(
-                          // This bool value toggles the switch.
                           value: checkVersionOnStart,
                           activeTrackColor: CupertinoColors.activeBlue,
                           onChanged: (bool value) {
                             setSettingBool(
                               name: PreferenceConstants.checkForNewVersionOnStart,
-                              type: "bool",
                               value: value,
                             );
                             setState(() => checkVersionOnStart = value);
@@ -559,13 +563,11 @@ class _SettingsState extends State<Settings> {
                       children: [
                         const Text("allow auto complete unit"),
                         CupertinoSwitch(
-                          // This bool value toggles the switch.
                           value: allowAutoComplete,
                           activeTrackColor: CupertinoColors.activeBlue,
                           onChanged: (bool value) {
                             setSettingBool(
                               name: PreferenceConstants.allowAutoCompleteUnit,
-                              type: "bool",
                               value: value,
                             );
                             setState(() => allowAutoComplete = value);
@@ -587,10 +589,14 @@ class _SettingsState extends State<Settings> {
                                 CharacterStokesSql.dropTable()
                                     .then(
                                       (value) {
-                                        SharedPrefs.prefs.setBool(
-                                          'character_stroke_data_downloaded',
-                                          false,
+                                        setSettingBool(
+                                          name:
+                                              'character_stroke_data_downloaded',
+                                          value: false,
                                         );
+                                        setState(() {
+                                          isDataDownloaded = false;
+                                        });
                                         showCupertinoDialog(
                                           barrierDismissible: true,
                                           context: context,
@@ -634,13 +640,13 @@ class _SettingsState extends State<Settings> {
                         const Text("Refresh DB (lose all data)"),
                         TextButton(
                             onPressed: isDeleting ? null : () async {
-                            setState(() {
-                              isDeleting = true;
-                            });
-                            await SQLHelper.refreshDB();
-                            setState(() {
-                              isDeleting = false;
-                            });
+                              setState(() {
+                                isDeleting = true;
+                              });
+                              await SQLHelper.refreshDB();
+                              setState(() {
+                                isDeleting = false;
+                              });
                             },
                             child: const Text("Refresh"),
                         ),
@@ -652,10 +658,18 @@ class _SettingsState extends State<Settings> {
                         CupertinoButton(
                           padding: EdgeInsets.zero,
                           onPressed: () async {
-                            final map = Preferences.getAllPreferences();
+                            final map =
+                                _preferencesService.getPreference(
+                                  key: PreferenceConstants.courses,
+                                );
                             print(map);
                             List settings = [];
-                            map.forEach((k, v) => settings.add([k, v]));
+                            if (map != null) {
+                              settings.add([
+                                PreferenceConstants.courses,
+                                map,
+                              ]);
+                            }
                             showCupertinoDialog(
                               barrierDismissible: true,
                               context: context,
@@ -683,7 +697,7 @@ class _SettingsState extends State<Settings> {
                       ],
                     ),
                     Visibility(
-                      visible: false, //enable to fetch from db
+                      visible: false,
                       child: Row(
                         children: [
                           const Text("Get latest data"),
@@ -739,8 +753,6 @@ class _SettingsState extends State<Settings> {
 
 // only for testing, can be deleted
 Map<String, dynamic> currSentence() {
-  //return  {"characters": "她叫什么名字", "pinyin": "tā jiào shénme míngzì", "meaning": "what's her name"};
-  //return {"characters": "我的弟弟想长高", "pinyin": "Wǒ de dìdi xiǎng zhǎng gāo", "meaning": "my younger brother wants to grow taller",};
   return {
     "characters": "我爱我的国家，它有很多美丽的河流和公园",
     "pinyin": "wǒ ài wǒ de guójiā, tā yǒu hěnduō měilì de héliú hé gōngyuán",

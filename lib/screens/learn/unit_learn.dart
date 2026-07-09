@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
-import 'package:hsk_learner/screens/settings/preferences.dart';
 import 'package:hsk_learner/service/audio_service.dart';
+import 'package:hsk_learner/service/preferences_service.dart';
 import 'package:provider/provider.dart';
 import '../../sql/learn_sql.dart';
 import '../stats/character_view.dart';
@@ -34,6 +34,8 @@ class UnitLearn extends StatefulWidget {
 
 class _UnitLearnState extends State<UnitLearn> {
   late final _audioService = context.read<AudioServiceBase>();
+  late final prefs = context.read<PreferencesServiceBase>();
+
   final PageController _pageController = PageController();
   @override
   void dispose() {
@@ -70,10 +72,10 @@ class _UnitLearnState extends State<UnitLearn> {
     exampleFuture = getUnits(0);
     futureList = List.generate(widget.wordList.length, (i) => getUnits(i));
     getSentenceList();
-    showLiteralPref = Preferences.getPreference(
-      PreferenceConstants.showLiteralMeaningInUnitLearn,
+    showLiteralPref = prefs.getPreference(
+      key: PreferenceConstants.showLiteralMeaningInUnitLearn,
     );
-    showExampleSentences = Preferences.getPreference(PreferenceConstants.showSentences);
+    showExampleSentences = prefs.getPreference(key: PreferenceConstants.showSentences);
     _audioService.speak(widget.wordList[0].hanzi);
   }
 
@@ -402,6 +404,7 @@ class _UnitLearnState extends State<UnitLearn> {
                                                           ),
                                                     ),
                                                   ).then((_) {
+                                                    // TODO throws Unhandled Exception: Looking up a deactivated widget's ancestor is unsafe.
                                                     Navigator.pop(context);
                                                   }),
                                                 }

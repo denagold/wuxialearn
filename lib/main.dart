@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/repositories/user_preferences_repository.dart';
 import 'package:hsk_learner/screens/settings/preferences.dart';
 import 'package:hsk_learner/service/audio_service.dart';
@@ -15,18 +16,29 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hsk_learner/screens/home/load_app.dart';
 
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   initSettings();
+
+  final prefs = await SharedPreferencesWithCache.create(
+    cacheOptions: SharedPreferencesWithCacheOptions(allowList: null),
+  );
+
   runApp(
     MultiProvider(
       providers: [
+        Provider<SharedPreferencesWithCache>(create: (_) => prefs),
+        Provider<PreferencesServiceBase>(
+          create: (ctx) => PreferencesService(ctx.read()),
+        ),
         Provider<ThemeServiceBase>(create: (context) => ThemeService()),
         Provider<AudioServiceBase>(create: (context) => AudioService()),
-        Provider<PreferencesServiceBase>(create: (context) => PreferencesService(),),
-        Provider<UserPreferencesRepository>(create: (context) => UserPreferencesRepository(context.read<PreferencesServiceBase>())),
+        Provider<UserPreferencesRepository>(
+          create: (context) => UserPreferencesRepository(context.read()),
+        ),
       ],
-      child: const MyApp(fdroid: true)
-    )
+      child: const MyApp(fdroid: true),
+    ),
   );
 }
 
@@ -75,19 +87,21 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final ThemeServiceBase themeService = context.read<ThemeServiceBase>();
+    final PreferencesServiceBase prefs = context.read<PreferencesServiceBase>();
+    prefs.setPreference(key: PreferenceConstants.debug, value: true);
     return FutureBuilder(
       future: initPrefs,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          final SharedPreferences prefs = SharedPrefs.prefs;
+         // final SharedPreferences prefs = SharedPrefs.prefs;
           //set theme to light if not set
-          if (prefs.getString('theme') == null) {
-            prefs.setString('theme', 'light');
+          if (prefs.getPreference(key: PreferenceConstants.theme) == null) {
+            prefs.setPreference(key: PreferenceConstants.theme, value: ThemeConstants.light);
           }
-          final brightness = switch (prefs.getString('theme')) {
-            "dark" => Brightness.dark,
-            "light" => Brightness.light,
-            "system" => MediaQuery.platformBrightnessOf(context),
+          final brightness = switch (prefs.getPreference(key: PreferenceConstants.theme)) {
+            ThemeConstants.dark => Brightness.dark,
+            ThemeConstants.light => Brightness.light,
+            ThemeConstants.system => MediaQuery.platformBrightnessOf(context),
             _ => Brightness.light,
           };
           themeService.setBrightness(brightness);

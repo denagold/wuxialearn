@@ -7,13 +7,13 @@ import 'package:hsk_learner/data_model/review_rating.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/stats/character_view.dart';
 import 'package:hsk_learner/service/audio_service.dart';
+import 'package:hsk_learner/service/preferences_service.dart';
 import 'package:hsk_learner/sql/review_flashcards_sql.dart';
 import 'package:provider/provider.dart';
 
 import '../../sql/stats_sql.dart';
 import '../../sql/word_view_sql.dart';
 import '../../utils/prototype.dart';
-import '../settings/preferences.dart';
 import 'flashcard.dart';
 
 class ReviewFlashcards extends StatefulWidget {
@@ -38,11 +38,12 @@ class ReviewFlashcards extends StatefulWidget {
 
 class _ReviewFlashcardsState extends State<ReviewFlashcards> {
   late final _audioService = context.read<AudioServiceBase>();
+  late final prefs = context.read<PreferencesServiceBase>();
 
   bool lastPage = false;
   bool wasClicked = false;
-  bool showPinyin = Preferences.getPreference(
-    PreferenceConstants.showPinyinByDefaultInReview,
+  late bool showPinyin = prefs.getPreference(
+    key: PreferenceConstants.showPinyinByDefaultInReview,
   );
   bool showHint = false;
   bool showShowHint = false;

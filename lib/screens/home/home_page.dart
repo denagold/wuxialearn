@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/screens/courses/course_home.dart';
 import 'package:hsk_learner/screens/review/review_home.dart';
-import 'package:hsk_learner/screens/settings/preferences.dart';
 import 'package:hsk_learner/screens/settings/settings.dart';
+import 'package:hsk_learner/service/preferences_service.dart';
+import 'package:provider/provider.dart';
 import '../stats/stats_home.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -16,13 +17,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends State<MyHomePage> {
-  onTappedTab(int index) {
+  late final prefs = context.read<PreferencesServiceBase>();
+
+  void onTappedTab(int index) {
     setState(() {
       tabsIndex = index;
     });
   }
 
-  final String s = Preferences.getPreference(PreferenceConstants.defaultHomePage);
+  late final String s = prefs.getPreference(key: PreferenceConstants.defaultHomePage);
   int tabsIndex = 0;
   late List<Widget> tabList = [];
   DateTime lastBackPress = DateTime.utc(1960);

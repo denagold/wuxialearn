@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/screens/learn/test_out.dart';
+import 'package:hsk_learner/service/preferences_service.dart';
+import 'package:provider/provider.dart';
 import '../../sql/learn_sql.dart';
-import '../settings/preferences.dart';
 import 'course_view.dart';
 
 class HSKCourseView extends StatefulWidget {
@@ -15,7 +16,8 @@ class HSKCourseView extends StatefulWidget {
 
 class _HSKCourseViewState extends State<HSKCourseView> {
   late Future<List<Map<String, dynamic>>> unitNumList;
-  final bool debug = Preferences.getPreference(PreferenceConstants.debug);
+  late final prefs = context.read<PreferencesServiceBase>();
+  late final bool debug = prefs.getPreference(key: PreferenceConstants.debug);
   @override
   void initState() {
     super.initState();
@@ -35,7 +37,7 @@ class _HSKCourseViewState extends State<HSKCourseView> {
 
   @override
   Widget build(BuildContext context) {
-    bool allowSkipUnits = Preferences.getPreference(PreferenceConstants.allowSkipUnits);
+    bool allowSkipUnits = prefs.getPreference(key: PreferenceConstants.allowSkipUnits);
     List<Widget> gridItems(List<Map<String, dynamic>> hskList) {
       List<Widget> widgets = [];
       List<int> hskListOffset = [];

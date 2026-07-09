@@ -5,10 +5,10 @@ import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/service/audio_service.dart';
+import 'package:hsk_learner/service/preferences_service.dart';
 import 'package:lpinyin/lpinyin.dart';
 import 'package:provider/provider.dart';
 
-import '../settings/preferences.dart';
 import '../../widgets/fixed_align.dart';
 
 class SentenceGame extends StatefulWidget {
@@ -32,6 +32,7 @@ class SentenceGame extends StatefulWidget {
 
 class _SentenceGameState extends State<SentenceGame> {
   late final _audioService = context.read<AudioServiceBase>();
+  late final prefs = context.read<PreferencesServiceBase>();
 
   late final String alreadyBuiltSentence;
   late final String sentenceToBuild;
@@ -74,7 +75,7 @@ class _SentenceGameState extends State<SentenceGame> {
     //pinyin = widget.currSentence["pinyin"].split(" ");
     showPinyin = ShowPinyin.showPinyin;
     super.initState();
-    bool debug = Preferences.getPreference(PreferenceConstants.debug);
+    bool debug = prefs.getPreference(key: PreferenceConstants.debug);
     if (!debug) {
       Random random = Random();
       int length = words.length;
