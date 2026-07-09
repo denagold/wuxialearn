@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class AppColors {
+class ThemeConstants {
   // Primary colors
   static const Color primaryBlue = Colors.blue;
   static const Color primaryColor = primaryBlue;
@@ -18,6 +18,10 @@ class AppColors {
   // Border and divider colors
   static const Color dividerColor = Color(0xFFECECEC);
   static const Color borderColor = dividerColor;
+
+  static const String dark = "dark";
+  static const String light = "light";
+  static const String system = "system";
 
   // Action colors
   static const Color actionColor = primaryBlue;
@@ -69,35 +73,35 @@ class ThemeService extends ThemeServiceBase {
   CupertinoThemeData getCupertinoTheme() {
     return CupertinoThemeData(
       brightness: _brightness,
-      primaryColor: AppColors.primaryColor,
+      primaryColor: ThemeConstants.primaryColor,
       textTheme: CupertinoTextThemeData(
         textStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(_brightness),
+          color: ThemeConstants.getTextColor(_brightness),
         ),
         actionTextStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(_brightness),
+          color: ThemeConstants.getTextColor(_brightness),
         ),
         navActionTextStyle: const TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.actionColor,
+          color: ThemeConstants.actionColor,
         ),
         navLargeTitleTextStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(_brightness),
+          color: ThemeConstants.getTextColor(_brightness),
         ),
         navTitleTextStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(_brightness),
+          color: ThemeConstants.getTextColor(_brightness),
         ),
         pickerTextStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(_brightness),
+          color: ThemeConstants.getTextColor(_brightness),
         ),
         dateTimePickerTextStyle: TextStyle(
           fontFamily: 'Roboto',
-          color: AppColors.getTextColor(_brightness),
+          color: ThemeConstants.getTextColor(_brightness),
         ),
       ),
     );
