@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
-import 'package:hsk_learner/service/audio_service.dart';
-import 'package:hsk_learner/service/preferences_service.dart';
+import 'package:hsk_learner/services/audio_service.dart';
+import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/utils/large_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

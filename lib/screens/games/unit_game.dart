@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/service/audio_service.dart';
+import 'package:hsk_learner/services/audio_service.dart';
 import 'package:provider/provider.dart';
 import '../../data_model/word_item.dart';
 import '../../sql/learn_sql.dart';

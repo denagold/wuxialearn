@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/screens/learn/test_out.dart';
-import 'package:hsk_learner/service/preferences_service.dart';
+import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:provider/provider.dart';
 import '../../sql/learn_sql.dart';
 import 'course_view.dart';

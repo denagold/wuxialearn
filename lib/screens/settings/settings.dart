@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
+import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/sql/pg_update.dart';
 import 'package:hsk_learner/sql/sql_helper.dart';
 import 'package:provider/provider.dart';
-import '../../service/preferences_service.dart';
 import '../../sql/character_stokes_sql.dart';
 import '../../utils/platform_info.dart';
 import 'backup.dart';

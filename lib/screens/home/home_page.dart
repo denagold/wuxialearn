@@ -4,7 +4,7 @@ import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/screens/courses/course_home.dart';
 import 'package:hsk_learner/screens/review/review_home.dart';
 import 'package:hsk_learner/screens/settings/settings.dart';
-import 'package:hsk_learner/service/preferences_service.dart';
+import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:provider/provider.dart';
 import '../stats/stats_home.dart';
 

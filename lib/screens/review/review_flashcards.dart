@@ -6,8 +6,8 @@ import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/review_rating.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/screens/stats/character_view.dart';
-import 'package:hsk_learner/service/audio_service.dart';
-import 'package:hsk_learner/service/preferences_service.dart';
+import 'package:hsk_learner/services/audio_service.dart';
+import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/sql/review_flashcards_sql.dart';
 import 'package:provider/provider.dart';
 

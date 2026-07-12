@@ -1,5 +1,5 @@
 import 'package:hsk_learner/models/review_rating.dart';
-import 'package:hsk_learner/service/review_rating_service.dart';
+import 'package:hsk_learner/services/review_rating_service.dart';
 
 abstract class ReviewRatingRepositoryBase {
 
@@ -10,7 +10,7 @@ abstract class ReviewRatingRepositoryBase {
   Future<ReviewRatingModel> getReviewRatingById(int id);
 
   /// Add a new review rating.
-  Future<void> addReviewRating(ReviewRatingModel rating);
+  Future<int> addReviewRating(ReviewRatingModel rating);
 
   /// Update an existing review rating.
   Future<void> updateReviewRating(ReviewRatingModel rating);

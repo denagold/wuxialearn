@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hsk_learner/service/theme_service.dart';
+import 'package:hsk_learner/services/theme_service.dart';
 import 'package:provider/provider.dart';
 
 Future<void> testApp(

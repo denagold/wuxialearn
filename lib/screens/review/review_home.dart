@@ -5,7 +5,7 @@ import 'package:hsk_learner/data_model/review_rating.dart';
 import 'package:hsk_learner/screens/review/review_flashcards.dart';
 import 'package:hsk_learner/screens/review/review_progress.dart';
 import 'package:hsk_learner/screens/review/review_quiz.dart';
-import 'package:hsk_learner/service/preferences_service.dart';
+import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/widgets/collapsible.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 import 'package:hsk_learner/widgets/hsk_listview/hsk_listview.dart';

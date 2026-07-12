@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/data_model/games/matching_card.dart';
-import 'package:hsk_learner/service/theme_service.dart';
+import 'package:hsk_learner/services/theme_service.dart';
 import 'package:provider/provider.dart';
 
 // TODO Unify constants for all games

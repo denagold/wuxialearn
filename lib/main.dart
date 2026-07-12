@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/repositories/user_preferences_repository.dart';
 import 'package:hsk_learner/screens/settings/preferences.dart';
-import 'package:hsk_learner/service/audio_service.dart';
-import 'package:hsk_learner/service/preferences_service.dart';
-import 'package:hsk_learner/service/theme_service.dart';
+import 'package:hsk_learner/services/audio_service.dart';
+import 'package:hsk_learner/services/preferences_service.dart';
+import 'package:hsk_learner/services/theme_service.dart';
 import 'package:hsk_learner/utils/platform_info.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -88,7 +88,6 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final ThemeServiceBase themeService = context.read<ThemeServiceBase>();
     final PreferencesServiceBase prefs = context.read<PreferencesServiceBase>();
-    prefs.setPreference(key: PreferenceConstants.debug, value: true);
     return FutureBuilder(
       future: initPrefs,
       builder: (context, snapshot) {

@@ -1,5 +1,5 @@
 
-import 'package:hsk_learner/service/audio_service.dart';
+import 'package:hsk_learner/services/audio_service.dart';
 
 class FakeAudioService extends AudioServiceBase {
   @override
