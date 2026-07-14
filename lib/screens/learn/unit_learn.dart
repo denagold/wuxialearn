@@ -1,10 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/repositories/app_preferences_repository.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:hsk_learner/services/audio_service.dart';
-import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:provider/provider.dart';
 import '../../sql/learn_sql.dart';
 import '../stats/character_view.dart';
@@ -34,7 +33,7 @@ class UnitLearn extends StatefulWidget {
 
 class _UnitLearnState extends State<UnitLearn> {
   late final _audioService = context.read<AudioServiceBase>();
-  late final prefs = context.read<PreferencesServiceBase>();
+  late final appPrefs = context.read<AppPreferencesRepositoryBase>();
 
   final PageController _pageController = PageController();
   @override
@@ -72,10 +71,8 @@ class _UnitLearnState extends State<UnitLearn> {
     exampleFuture = getUnits(0);
     futureList = List.generate(widget.wordList.length, (i) => getUnits(i));
     getSentenceList();
-    showLiteralPref = prefs.getPreference(
-      key: PreferenceConstants.showLiteralMeaningInUnitLearn,
-    );
-    showExampleSentences = prefs.getPreference(key: PreferenceConstants.showSentences);
+    showLiteralPref = appPrefs.showLiteralMeaningInUnitLearn;
+    showExampleSentences = appPrefs.showSentences;
     _audioService.speak(widget.wordList[0].hanzi);
   }
 

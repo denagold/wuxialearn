@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/screens/learn/subunit_view.dart';
-import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:provider/provider.dart';
 import '../../sql/learn_sql.dart';
 import '../../sql/manage_review_sql.dart';
@@ -27,12 +26,12 @@ class UnitView extends StatefulWidget {
 }
 
 class _UnitViewState extends State<UnitView> {
-  late final prefs = context.read<PreferencesServiceBase>();
+  late final coursePrefs = context.read<CoursePreferencesRepositoryBase>();
 
   late Future<List<Map<String, dynamic>>> hskFuture;
   late Future<List<Map<String, dynamic>>> sentencesFuture;
   late Future<List<Map<String, dynamic>>> subunitFuture;
-  late final bool debug = prefs.getPreference(key: PreferenceConstants.debug);
+  late final bool debug = coursePrefs.debug;
   final bool allowAutoComplete = true;
 
   @override

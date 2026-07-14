@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/constants/preference_constants.dart';
+import 'package:hsk_learner/repositories/app_preferences_repository.dart';
 import 'package:hsk_learner/screens/stats/svg.dart';
-import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/sql/character_view_sql.dart';
 import 'package:hsk_learner/utils/prototype.dart';
 import 'package:hsk_learner/widgets/common/toggle_buttons.dart';
@@ -16,7 +15,7 @@ class CharacterView extends StatefulWidget {
 }
 
 class _CharacterViewState extends State<CharacterView> {
-  late final prefs = context.read<PreferencesServiceBase>();
+  late final appPrefs = context.read<AppPreferencesRepositoryBase>();
   late Future<List<Map<String, dynamic>>> literalMeaning;
   late Future<List<Map<String, dynamic>>> sentencesFuture;
   bool showPinyin = true;
@@ -80,10 +79,7 @@ class _CharacterViewState extends State<CharacterView> {
                                 style: const TextStyle(fontSize: 35),
                               ),
                               Visibility(
-                                visible:
-                                    prefs.getPreference(key: PreferenceConstants.isCharacterStrokeDataDownloaded
-                                    ) ??
-                                    false,
+                                visible: appPrefs.isCharacterStrokeDataDownloaded,
                                 child: SvgCharacter(
                                   character: stats[0]["hanzi"],
                                   size: 200,

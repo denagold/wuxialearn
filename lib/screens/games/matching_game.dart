@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/services/audio_service.dart';
-import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/utils/large_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +27,7 @@ class MatchingGame extends StatefulWidget {
 
 class _MatchingGameState extends State<MatchingGame> {
   late final _audioService = context.read<AudioServiceBase>();
-  late final prefs = context.read<PreferencesServiceBase>();
+  late final coursePrefs = context.read<CoursePreferencesRepositoryBase>();
 
   int numCords = 0;
   List leftYCords = [];
@@ -55,7 +54,7 @@ class _MatchingGameState extends State<MatchingGame> {
     numCords = widget.wordList.length;
     leftYCords = createYCordList(numCords);
     rightYCords = createYCordList(numCords);
-    bool debug = prefs.getPreference(key: PreferenceConstants.debug);
+    bool debug = coursePrefs.debug;
     if (!debug) {
       leftYCords.shuffle();
       rightYCords.shuffle();

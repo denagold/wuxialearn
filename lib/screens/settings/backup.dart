@@ -5,7 +5,9 @@ import 'package:d4_dsv/d4_dsv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
-import 'package:hsk_learner/screens/settings/preferences.dart';
+import 'package:hsk_learner/services/preferences_service.dart';
+import 'package:hsk_learner/sql/preferences_sql.dart';
+import 'package:hsk_learner/sql/sql_helper.dart';
 import 'package:hsk_learner/utils/platform_info.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
@@ -13,8 +15,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:tar/tar.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-import '../../sql/preferences_sql.dart';
-import '../../sql/sql_helper.dart';
 
 final class Backup {
   static const int backupFileFormatVersion = 1;
@@ -67,6 +67,12 @@ final class Backup {
     reviewRating,
     preferences,
   ];
+
+  static late final PreferencesServiceBase _prefService;
+
+  static void init(PreferencesServiceBase prefs) {
+    _prefService = prefs;
+  }
 
   static Future<bool> startBackupWithFileSelection() async {
     if (kIsWeb) {
@@ -218,7 +224,6 @@ final class Backup {
     } else {
       return false;
     }
-    Preferences.initPreferences();
     return true;
   }
 
@@ -236,16 +241,16 @@ final class Backup {
     if (!isBackupRestored) {
       return false;
     }
-    final latestVersion = Preferences.getPreference(
-      PreferenceConstants.latestDbVersionConstant,
+    final latestVersion = _prefService.getPreference(
+      key: PreferenceConstants.latestDbVersionConstant,
     );
-    Preferences.setPreference(name: PreferenceConstants.dbVersion, value: latestVersion);
+    _prefService.setPreference(key: PreferenceConstants.dbVersion, value: latestVersion);
     PreferencesSql.setPreference(
       name: PreferenceConstants.dbVersion,
       value: latestVersion,
       type: "string",
     );
-    final currVersion = Preferences.getPreference(PreferenceConstants.dbVersion);
+    final currVersion = _prefService.getPreference(key: PreferenceConstants.dbVersion);
     print(latestVersion);
     print(currVersion);
     print(latestVersion == currVersion);

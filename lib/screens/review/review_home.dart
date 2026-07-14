@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/review_rating.dart';
+import 'package:hsk_learner/repositories/app_preferences_repository.dart';
+import 'package:hsk_learner/repositories/review_preferences_repository.dart';
 import 'package:hsk_learner/screens/review/review_flashcards.dart';
 import 'package:hsk_learner/screens/review/review_progress.dart';
 import 'package:hsk_learner/screens/review/review_quiz.dart';
-import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/widgets/collapsible.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 import 'package:hsk_learner/widgets/hsk_listview/hsk_listview.dart';
@@ -86,7 +86,8 @@ const flashCardType = "Flashcards";
 const quizType = "Quiz (ungraded)";
 
 class _ReviewPageState extends State<ReviewPage> {
-  late final prefs = context.read<PreferencesServiceBase>();
+  late final reviewPrefs = context.read<ReviewPreferencesRepositoryBase>();
+  late final appPrefs = context.read<AppPreferencesRepositoryBase>();
 
   late Future<List<Map<String, dynamic>>> hskList;
   late List<Future<List<Map<String, dynamic>>>> sentenceList;
@@ -94,10 +95,8 @@ class _ReviewPageState extends State<ReviewPage> {
       ReviewSql.getReviewRatings();
   bool lastPage = false;
   int numCards = -1;
-  late bool previewDeck = prefs.getPreference(key: PreferenceConstants.showTranslations);
-  late bool showPinyin = prefs.getPreference(
-    key: PreferenceConstants.showPinyinByDefaultInReview,
-  );
+  bool previewDeck = false;
+  bool showPinyin = false;
   bool isCollapsed = true;
   bool deckExists = true;
   List<String> reviewWordsOptions = [
@@ -124,19 +123,18 @@ class _ReviewPageState extends State<ReviewPage> {
   @override
   void initState() {
     super.initState();
+    previewDeck = appPrefs.showTranslations;
+    showPinyin = appPrefs.showPinyinByDefaultInReview;
     _loadReviewType();
     hskList = getReview();
   }
 
   void _loadReviewType() {
     setState(() {
-      reviewTypeValue =
-          prefs.getPreference(key: PreferenceConstants.reviewType) ??
-          flashCardType; // Default to Flashcards
-      reviewWordsValue = prefs.getPreference(key: PreferenceConstants.reviewWords) ?? 'SRS'; // Default to
-      deckSizeValue =
-          prefs.getPreference(key: PreferenceConstants.deckSize) ?? 'Small'; // Default to Flashcards
-      deckName = prefs.getPreference(key: PreferenceConstants.deckName) ?? 'hsk'; // Default to Flashcards
+      reviewTypeValue = reviewPrefs.reviewType ?? flashCardType;
+      reviewWordsValue = reviewPrefs.reviewWords ?? 'SRS';
+      deckSizeValue = reviewPrefs.deckSize ?? 'Small';
+      deckName = reviewPrefs.deckName ?? 'hsk';
     });
   }
 
@@ -439,7 +437,7 @@ class _ReviewPageState extends State<ReviewPage> {
                     setState(() {
                       reviewWordsValue = reviewWordsOptions[index];
                     });
-                    prefs.setPreference(key: PreferenceConstants.reviewWords, value: reviewWordsValue);
+                    reviewPrefs.reviewWords = reviewWordsValue;
                   },
                   child: Text(reviewWordsOptions[index]),
                 );
@@ -465,7 +463,7 @@ class _ReviewPageState extends State<ReviewPage> {
                     setState(() {
                       reviewTypeValue = reviewTypeOptions[index];
                     });
-                    prefs.setPreference(key: PreferenceConstants.reviewType, value: reviewTypeValue);
+                    reviewPrefs.reviewType = reviewTypeValue;
                   },
                   child: Text(reviewTypeOptions[index]),
                 );
@@ -491,7 +489,7 @@ class _ReviewPageState extends State<ReviewPage> {
                     setState(() {
                       deckSizeValue = deckSizeOptions[index];
                     });
-                    prefs.setPreference(key: PreferenceConstants.deckSize, value: deckSizeValue);
+                    reviewPrefs.deckSize = deckSizeValue;
                   },
                   child: Text(deckSizeOptions[index]),
                 );
@@ -517,7 +515,7 @@ class _ReviewPageState extends State<ReviewPage> {
                     setState(() {
                       deckName = deckNames[index];
                     });
-                    prefs.setPreference(key: PreferenceConstants.deckName, value: deckName);
+                    reviewPrefs.deckName = deckName;
                   },
                   child: Text(deckNames[index]),
                 );

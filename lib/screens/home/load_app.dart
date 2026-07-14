@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:hsk_learner/constants/preference_constants.dart';
+import 'package:hsk_learner/repositories/app_state_repository.dart';
 import 'package:hsk_learner/screens/home/home_page.dart';
 import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/sql/load_app_sql.dart';
@@ -9,8 +9,6 @@ import 'package:hsk_learner/sql/schema_migration.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:provider/provider.dart';
 import 'package:version/version.dart';
-import '../../sql/preferences_sql.dart';
-import '../settings/preferences.dart';
 import 'package:http/http.dart' as http;
 
 class LoadApp extends StatefulWidget {
@@ -23,6 +21,7 @@ class LoadApp extends StatefulWidget {
 
 class _LoadAppState extends State<LoadApp> {
   late final _preferencesService = context.read<PreferencesServiceBase>();
+  late final _appState = context.read<AppStateRepositoryBase>();
   bool isLoading = true;
   @override
   void initState() {
@@ -34,14 +33,12 @@ class _LoadAppState extends State<LoadApp> {
   void getPreferences() async {
     //this could cause issues if Preferences should be changed after the
     //schema migration.
-    await Preferences.initPreferences();
-    final Version appVersion = Version.parse(_preferencesService.getPreference(key: PreferenceConstants.appVersion));
+    final Version appVersion = Version.parse(_appState.appVersion);
     final Version latestVersion = Version.parse(await _getAppVersion());
-    final bool isFirstRun = _preferencesService.getPreference(key: PreferenceConstants.isFirstRun);
+    final bool isFirstRun = _appState.isFirstRun;
     if(appVersion < latestVersion && !isFirstRun){
-      _preferencesService.setPreference(key: PreferenceConstants.appVersion, value: latestVersion);
-      PreferencesSql.setPreference(name: PreferenceConstants.appVersion, value: latestVersion.toString(), type: "string");
-      await SchemaMigration.run();
+      _appState.appVersion = latestVersion.toString();
+      await SchemaMigration.run(_preferencesService);
       showUpdateChangesModal();
     }
     init();
@@ -55,9 +52,9 @@ class _LoadAppState extends State<LoadApp> {
   }
 
   void showUpdateChangesModal() async{
-    final Version appVersion = Version.parse(_preferencesService.getPreference(key: PreferenceConstants.appVersion));
+    final Version appVersion = Version.parse(_appState.appVersion);
     if(appVersion <= Version.parse("1.3.3")){
-      final bool isFirstRun = _preferencesService.getPreference(key: PreferenceConstants.isFirstRun);
+      final bool isFirstRun = _appState.isFirstRun;
       if(!isFirstRun) {
         showCupertinoDialog(
         context: context,
@@ -86,20 +83,16 @@ class _LoadAppState extends State<LoadApp> {
   }
 
   void init() {
-    final String currentVersion = _preferencesService.getPreference(key: PreferenceConstants.dbVersion);
-    final String latestVersion = _preferencesService.getPreference(key: 
-      PreferenceConstants.latestDbVersionConstant,
-    );
+    final String currentVersion = _appState.dbVersion;
+    final String latestVersion = _appState.latestDbVersionConstant;
     print("currentVersion: $currentVersion");
     print("latestVersion: $latestVersion");
     if (currentVersion != latestVersion) {
       //print("backing up...");
       //Backup.startBackupFromTempDir();
     }
-    final bool check = _preferencesService.getPreference(key: 
-      PreferenceConstants.checkForNewVersionOnStart,
-    );
-    final bool isFirstRun = _preferencesService.getPreference(key: PreferenceConstants.isFirstRun);
+    final bool check = _appState.checkForNewVersionOnStart;
+    final bool isFirstRun = _appState.isFirstRun;
     if (check && !isFirstRun) {
       checkForDbUpdate();
     }
@@ -113,7 +106,7 @@ class _LoadAppState extends State<LoadApp> {
     if (isLoading) {
       return const Loading();
     } else {
-      final bool isFirstRun = _preferencesService.getPreference(key: PreferenceConstants.isFirstRun);
+      final bool isFirstRun = _appState.isFirstRun;
       if (isFirstRun) {
         if (widget.fdroid) {
           Future.delayed(const Duration(seconds: 0)).then((_) {
@@ -163,25 +156,16 @@ class _LoadAppState extends State<LoadApp> {
   }
 
   void setFirstRun() {
-    PreferencesSql.setPreference(name: PreferenceConstants.isFirstRun, value: "0", type: "bool");
-    _preferencesService.setPreference(key: PreferenceConstants.isFirstRun, value: false);
+    _appState.isFirstRun = false;
   }
 
   void setCheckForUpdate(bool setState) {
-    PreferencesSql.setPreference(
-      name: PreferenceConstants.checkForNewVersionOnStart,
-      value: setState ? "1" : "0",
-      type: "bool",
-    );
-    _preferencesService.setPreference(
-      key: PreferenceConstants.checkForNewVersionOnStart,
-      value: setState,
-    );
+    _appState.checkForNewVersionOnStart = setState;
   }
 
   void checkForDbUpdate() async {
     print("checking for update");
-    final String lastVersion = _preferencesService.getPreference(key: PreferenceConstants.dbVersion);
+    final String lastVersion = _appState.dbVersion;
     const String versionUrl =
         'https://cdn.jsdelivr.net/gh/wuxialearn/data@main/version';
     final req = await http.get(Uri.parse(versionUrl));
@@ -189,12 +173,7 @@ class _LoadAppState extends State<LoadApp> {
     //disable for this release as we will update sqlite file directly
     if (version != lastVersion && 1 == 0) {
       await LoadAppSql.updateSqliteFromCsv();
-      _preferencesService.setPreference(key: PreferenceConstants.dbVersion, value: version);
-      PreferencesSql.setPreference(
-        name: PreferenceConstants.dbVersion,
-        value: version,
-        type: 'string',
-      );
+      _appState.dbVersion = version;
       //todo: when we implement real state management we should update the courses screen here
       setState(() {});
     }

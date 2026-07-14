@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/constants/preference_constants.dart';
-import 'package:hsk_learner/services/preferences_service.dart';
+import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:provider/provider.dart';
 
 import '../learn/unit_view.dart';
@@ -26,7 +25,7 @@ class CourseView extends StatefulWidget {
 }
 
 class _CourseViewState extends State<CourseView> {
-  late final prefs = context.read<PreferencesServiceBase>();
+  late final coursePrefs = context.read<CoursePreferencesRepositoryBase>();
   late int hskLevel;
   @override
   Widget build(BuildContext context) {
@@ -99,8 +98,8 @@ class _CourseViewState extends State<CourseView> {
   }
 
   _showActionSheet<bool>(BuildContext context) {
-    final courses = prefs.getPreference(key: PreferenceConstants.courses);
-    final allowSkipUnits = prefs.getPreference(key: PreferenceConstants.allowSkipUnits);
+    final courses = coursePrefs.courses;
+    final allowSkipUnits = coursePrefs.allowSkipUnits;
     showCupertinoModalPopup<bool>(
       context: context,
       builder:

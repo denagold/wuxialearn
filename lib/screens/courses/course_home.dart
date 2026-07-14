@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:hsk_learner/constants/preference_constants.dart';
+import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/screens/courses/hsk_course.dart';
-import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:provider/provider.dart';
 
 import 'custom_course.dart';
@@ -14,10 +13,10 @@ class CourseHome extends StatefulWidget {
 }
 
 class _CourseHomeState extends State<CourseHome> {
-  late final prefs = context.read<PreferencesServiceBase>();
+  late final coursePrefs = context.read<CoursePreferencesRepositoryBase>();
   @override
   Widget build(BuildContext context) {
-    final course = prefs.getPreference(key: PreferenceConstants.defaultCourse);
+    final course = coursePrefs.defaultCourse;
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         //backgroundColor: Colors.transparent,
@@ -34,7 +33,7 @@ class _CourseHomeState extends State<CourseHome> {
 
   void changeCourse(String courseName) {
     setState(() {
-      prefs.setPreference(key: PreferenceConstants.defaultCourse, value: courseName);
+      coursePrefs.defaultCourse = courseName;
     });
   }
 }

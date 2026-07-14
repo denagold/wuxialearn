@@ -3,8 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
-import 'package:hsk_learner/repositories/user_preferences_repository.dart';
-import 'package:hsk_learner/screens/settings/preferences.dart';
+import 'package:hsk_learner/repositories/app_state_repository.dart';
+import 'package:hsk_learner/repositories/app_preferences_repository.dart';
+import 'package:hsk_learner/repositories/course_preferences_repository.dart';
+import 'package:hsk_learner/repositories/review_preferences_repository.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/services/theme_service.dart';
@@ -33,8 +35,17 @@ Future<void> main() async {
         ),
         Provider<ThemeServiceBase>(create: (context) => ThemeService()),
         Provider<AudioServiceBase>(create: (context) => AudioService()),
-        Provider<UserPreferencesRepository>(
-          create: (context) => UserPreferencesRepository(context.read()),
+        Provider<AppStateRepositoryBase>(
+          create: (context) => AppStateRepositoryImpl(context.read()),
+        ),
+        Provider<ReviewPreferencesRepositoryBase>(
+          create: (context) => ReviewPreferencesRepositoryImpl(context.read()),
+        ),
+        Provider<CoursePreferencesRepositoryBase>(
+          create: (context) => CoursePreferencesRepositoryImpl(context.read()),
+        ),
+        Provider<AppPreferencesRepositoryBase>(
+          create: (context) => AppPreferencesRepositoryImpl(context.read()),
         ),
       ],
       child: const MyApp(fdroid: true),
@@ -76,47 +87,29 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late Future<void> initPrefs;
-
-  @override
-  void initState() {
-    initPrefs = SharedPrefs.init();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     final ThemeServiceBase themeService = context.read<ThemeServiceBase>();
     final PreferencesServiceBase prefs = context.read<PreferencesServiceBase>();
-    return FutureBuilder(
-      future: initPrefs,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-         // final SharedPreferences prefs = SharedPrefs.prefs;
-          //set theme to light if not set
-          if (prefs.getPreference(key: PreferenceConstants.theme) == null) {
-            prefs.setPreference(key: PreferenceConstants.theme, value: ThemeConstants.light);
-          }
-          final brightness = switch (prefs.getPreference(key: PreferenceConstants.theme)) {
-            ThemeConstants.dark => Brightness.dark,
-            ThemeConstants.light => Brightness.light,
-            ThemeConstants.system => MediaQuery.platformBrightnessOf(context),
-            _ => Brightness.light,
-          };
-          themeService.setBrightness(brightness);
-          return Theme(
-            data: themeService.getMaterialTheme(),
-            child: CupertinoApp(
-              theme: themeService.getCupertinoTheme(),
-              scrollBehavior: const CupertinoScrollBehavior(),
-              title: 'Wuxia Learn',
-              home: LoadApp(fdroid: widget.fdroid),
-            ),
-          );
-        } else {
-          return const SizedBox();
-        }
-      },
+    //set theme to light if not set
+    if (prefs.getPreference(key: PreferenceConstants.theme) == null) {
+      prefs.setPreference(key: PreferenceConstants.theme, value: ThemeConstants.light);
+    }
+    final brightness = switch (prefs.getPreference(key: PreferenceConstants.theme)) {
+      ThemeConstants.dark => Brightness.dark,
+      ThemeConstants.light => Brightness.light,
+      ThemeConstants.system => MediaQuery.platformBrightnessOf(context),
+      _ => Brightness.light,
+    };
+    themeService.setBrightness(brightness);
+    return Theme(
+      data: themeService.getMaterialTheme(),
+      child: CupertinoApp(
+        theme: themeService.getCupertinoTheme(),
+        scrollBehavior: const CupertinoScrollBehavior(),
+        title: 'Wuxia Learn',
+        home: LoadApp(fdroid: widget.fdroid),
+      ),
     );
   }
 }

@@ -1,11 +1,10 @@
 import 'dart:math';
 
-import 'package:hsk_learner/constants/preference_constants.dart';
+import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/services/audio_service.dart';
-import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:lpinyin/lpinyin.dart';
 import 'package:provider/provider.dart';
 
@@ -32,7 +31,7 @@ class SentenceGame extends StatefulWidget {
 
 class _SentenceGameState extends State<SentenceGame> {
   late final _audioService = context.read<AudioServiceBase>();
-  late final prefs = context.read<PreferencesServiceBase>();
+  late final coursePrefs = context.read<CoursePreferencesRepositoryBase>();
 
   late final String alreadyBuiltSentence;
   late final String sentenceToBuild;
@@ -75,7 +74,7 @@ class _SentenceGameState extends State<SentenceGame> {
     //pinyin = widget.currSentence["pinyin"].split(" ");
     showPinyin = ShowPinyin.showPinyin;
     super.initState();
-    bool debug = prefs.getPreference(key: PreferenceConstants.debug);
+    bool debug = coursePrefs.debug;
     if (!debug) {
       Random random = Random();
       int length = words.length;

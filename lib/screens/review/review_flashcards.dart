@@ -2,12 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/review_rating.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/repositories/app_preferences_repository.dart';
 import 'package:hsk_learner/screens/stats/character_view.dart';
 import 'package:hsk_learner/services/audio_service.dart';
-import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/sql/review_flashcards_sql.dart';
 import 'package:provider/provider.dart';
 
@@ -38,13 +37,11 @@ class ReviewFlashcards extends StatefulWidget {
 
 class _ReviewFlashcardsState extends State<ReviewFlashcards> {
   late final _audioService = context.read<AudioServiceBase>();
-  late final prefs = context.read<PreferencesServiceBase>();
+  late final appPrefs = context.read<AppPreferencesRepositoryBase>();
 
   bool lastPage = false;
   bool wasClicked = false;
-  late bool showPinyin = prefs.getPreference(
-    key: PreferenceConstants.showPinyinByDefaultInReview,
-  );
+  bool showPinyin = false;
   bool showHint = false;
   bool showShowHint = false;
   bool showSentences = false;
@@ -55,6 +52,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
 
   @override
   void initState() {
+    showPinyin = appPrefs.showPinyinByDefaultInReview;
     reviewList = widget.hskList;
     super.initState();
     setShowHint();

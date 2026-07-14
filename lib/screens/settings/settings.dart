@@ -1,8 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
+import 'package:hsk_learner/repositories/app_preferences_repository.dart';
+import 'package:hsk_learner/repositories/app_state_repository.dart';
+import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/sql/pg_update.dart';
+import 'package:hsk_learner/sql/preferences_sql.dart';
 import 'package:hsk_learner/sql/sql_helper.dart';
 import 'package:provider/provider.dart';
 import '../../sql/character_stokes_sql.dart';
@@ -19,7 +23,9 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  late final _preferencesService = context.read<PreferencesServiceBase>();
+  late final _appState = context.read<AppStateRepositoryBase>();
+  late final _coursePrefs = context.read<CoursePreferencesRepositoryBase>();
+  late final _appPrefs = context.read<AppPreferencesRepositoryBase>();
 
   late bool translation;
   late bool reviewPinyin;
@@ -44,60 +50,79 @@ class _SettingsState extends State<Settings> {
   @override
   void initState() {
     super.initState();
-    translation = _preferencesService.getPreference(
-      key: PreferenceConstants.showTranslations,
-    ) ?? false;
-    reviewPinyin = _preferencesService.getPreference(
-      key: PreferenceConstants.showPinyinByDefaultInReview,
-    ) ?? false;
-    checkVersionOnStart = _preferencesService.getPreference(
-      key: PreferenceConstants.checkForNewVersionOnStart,
-    ) ?? false;
-    debug = _preferencesService.getPreference(
-      key: PreferenceConstants.debug,
-    ) ?? false;
-    allowSkipUnits = _preferencesService.getPreference(
-      key: PreferenceConstants.allowSkipUnits,
-    ) ?? false;
-    showExampleSentences = _preferencesService.getPreference(
-      key: PreferenceConstants.showSentences,
-    ) ?? false;
-    allowAutoComplete = _preferencesService.getPreference(
-      key: PreferenceConstants.allowAutoCompleteUnit,
-    ) ?? false;
-    showLiteralInUnitLearn = _preferencesService.getPreference(
-      key: PreferenceConstants.showLiteralMeaningInUnitLearn,
-    ) ?? false;
-    courses = _preferencesService.getPreference(
-      key: PreferenceConstants.courses,
-    ) ?? [];
-    defaultCourse = _preferencesService.getPreference(
-      key: PreferenceConstants.defaultCourse,
-    ) ?? '';
-    defaultHomePage = _preferencesService.getPreference(
-      key: PreferenceConstants.defaultHomePage,
-    ) ?? '';
-    isDataDownloaded = _preferencesService.getPreference(
-      key: 'character_stroke_data_downloaded',
-    ) ?? false;
-    theme = _preferencesService.getPreference(key: 'theme') ?? 'system';
+    translation = _appPrefs.showTranslations;
+    reviewPinyin = _appPrefs.showPinyinByDefaultInReview;
+    checkVersionOnStart = _appState.checkForNewVersionOnStart;
+    debug = _coursePrefs.debug;
+    allowSkipUnits = _coursePrefs.allowSkipUnits;
+    showExampleSentences = _appPrefs.showSentences;
+    allowAutoComplete = _coursePrefs.allowAutoCompleteUnit;
+    showLiteralInUnitLearn = _appPrefs.showLiteralMeaningInUnitLearn;
+    courses = _coursePrefs.courses;
+    defaultCourse = _coursePrefs.defaultCourse;
+    defaultHomePage = _appPrefs.defaultHomePage;
+    isDataDownloaded = _appPrefs.isCharacterStrokeDataDownloaded;
+    theme = _appPrefs.theme;
   }
 
-  setSettingBool({
+  void setSettingBool({
     required String name,
     required bool value,
   }) {
-    _preferencesService.setPreference(key: name, value: value);
+    switch (name) {
+      case PreferenceConstants.showTranslations:
+        _appPrefs.showTranslations = value;
+        break;
+      case PreferenceConstants.showPinyinByDefaultInReview:
+        _appPrefs.showPinyinByDefaultInReview = value;
+        break;
+      case PreferenceConstants.showSentences:
+        _appPrefs.showSentences = value;
+        break;
+      case PreferenceConstants.showLiteralMeaningInUnitLearn:
+        _appPrefs.showLiteralMeaningInUnitLearn = value;
+        break;
+      case PreferenceConstants.debug:
+        _coursePrefs.debug = value;
+        break;
+      case PreferenceConstants.allowSkipUnits:
+        _coursePrefs.allowSkipUnits = value;
+        break;
+      case PreferenceConstants.allowAutoCompleteUnit:
+        _coursePrefs.allowAutoCompleteUnit = value;
+        break;
+      case PreferenceConstants.checkForNewVersionOnStart:
+        _appState.checkForNewVersionOnStart = value;
+        break;
+      case PreferenceConstants.isCharacterStrokeDataDownloaded:
+        _appPrefs.isCharacterStrokeDataDownloaded = value;
+        break;
+    }
+    // TODO old implementation writes to the db as well
+    String val = value == true ? '1' : '0';
+    PreferencesSql.setPreference(name: name, value: val, type: 'bool');
   }
 
-  setSettingString({
+  void setSettingString({
     required String name,
     required String value,
   }) {
-    _preferencesService.setPreference(key: name, value: value);
+    switch (name) {
+      case PreferenceConstants.defaultCourse:
+        _coursePrefs.defaultCourse = value;
+        break;
+      case PreferenceConstants.defaultHomePage:
+        _appPrefs.defaultHomePage = value;
+        break;
+      case 'theme':
+        _appPrefs.theme = value;
+        break;
+    }
+    // TODO old implementation writes to the db as well
+    PreferencesSql.setPreference(name: name, value: value, type: 'string');
   }
 
-  _showDefaultCourseActionSheet<bool>(BuildContext context) {
+  void _showDefaultCourseActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -115,7 +140,7 @@ class _SettingsState extends State<Settings> {
                   );
                   Navigator.pop(context, true);
                   setState(() {
-                    defaultCourse = _preferencesService.getPreference(key: PreferenceConstants.defaultCourse)!;
+                    defaultCourse = _coursePrefs.defaultCourse;
                   });
                 },
                 child: Text(courses[index]),
@@ -125,7 +150,7 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  _showDefaultHomePageActionSheet<bool>(BuildContext context) {
+  void _showDefaultHomePageActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -154,7 +179,7 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  _showThemeSelectionDialog(BuildContext context) {
+  void _showThemeSelectionDialog(BuildContext context) {
     showCupertinoModalPopup(
       context: context,
       builder:
@@ -352,8 +377,7 @@ class _SettingsState extends State<Settings> {
                                             .then(
                                               (value) {
                                                 setSettingBool(
-                                                  name:
-                                                      'character_stroke_data_downloaded',
+                                                  name: PreferenceConstants.isCharacterStrokeDataDownloaded,
                                                   value: true,
                                                 );
                                                 setState(() {
@@ -410,6 +434,8 @@ class _SettingsState extends State<Settings> {
                         const Text("Backup data"),
                         IconButton(
                           onPressed: () async {
+                            final prefService = context.read<PreferencesServiceBase>();
+                            Backup.init(prefService);
                             Future<bool> updated =
                                 Backup.startBackupWithFileSelection();
                             updated.then(
@@ -658,18 +684,13 @@ class _SettingsState extends State<Settings> {
                         CupertinoButton(
                           padding: EdgeInsets.zero,
                           onPressed: () async {
-                            final map =
-                                _preferencesService.getPreference(
-                                  key: PreferenceConstants.courses,
-                                );
-                            print(map);
-                            List settings = [];
-                            if (map != null) {
-                              settings.add([
-                                PreferenceConstants.courses,
-                                map,
-                              ]);
-                            }
+                              final map = _coursePrefs.courses;
+                              print(map);
+                             List settings = [];
+                             settings.add([
+                               PreferenceConstants.courses,
+                               map,
+                             ]);
                             showCupertinoDialog(
                               barrierDismissible: true,
                               context: context,

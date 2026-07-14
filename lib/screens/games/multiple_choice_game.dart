@@ -1,10 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:hsk_learner/services/audio_service.dart';
-import 'package:hsk_learner/services/preferences_service.dart';
 import 'dart:math';
 import 'package:provider/provider.dart';
 import '../../utils/styles.dart';
@@ -206,13 +205,13 @@ class AnswersList extends StatefulWidget {
 }
 
 class _AnswersListState extends State<AnswersList> {
-  late final prefs = context.read<PreferencesServiceBase>();
+  late final coursePrefs = context.read<CoursePreferencesRepositoryBase>();
   late List<WordItem> buttonSelectionWords;
   bool clicked = false;
   @override
   void initState() {
     super.initState();
-    bool debug = prefs.getPreference(key: PreferenceConstants.debug);
+    bool debug = coursePrefs.debug;
     final groupWordsCopy = List.generate(
       widget.wordList.length,
       (index) => widget.wordList[index],

@@ -1,10 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/screens/learn/unit_learn.dart';
 import 'package:hsk_learner/services/audio_service.dart';
-import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:provider/provider.dart';
 import '../../sql/learn_sql.dart';
 import '../../widgets/hsk_listview/hsk_listview.dart';
@@ -36,11 +35,11 @@ class SubunitView extends StatefulWidget {
 }
 
 class _SubunitViewState extends State<SubunitView> {
-  late final prefs = context.read<PreferencesServiceBase>();
+  late final coursePrefs = context.read<CoursePreferencesRepositoryBase>();
   late final _audioService = context.read<AudioServiceBase>();
   late Future<List<Map<String, dynamic>>> sentenceList;
-  late final bool debug = prefs.getPreference(key: PreferenceConstants.debug);
-  late final bool allowSkipUnits = prefs.getPreference(key: PreferenceConstants.allowSkipUnits);
+  late final bool debug = coursePrefs.debug;
+  late final bool allowSkipUnits = coursePrefs.allowSkipUnits;
 
   @override
   void initState() {
@@ -109,6 +108,7 @@ class _SubunitViewState extends State<SubunitView> {
                                       ),
                                 ),
                               ).then((_) {
+                                // TODO Unhandled Exception: Null check operator used on a null value
                                 Navigator.pop(context);
                               });
                             },
