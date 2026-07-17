@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/repositories/course_preferences_repository.dart';
+import 'package:hsk_learner/repositories/learn_repository.dart';
 import 'package:hsk_learner/screens/learn/subunit_view.dart';
 import 'package:provider/provider.dart';
-import '../../sql/learn_sql.dart';
 import '../../sql/manage_review_sql.dart';
 import '../../sql/stats_sql.dart';
 
@@ -27,6 +27,7 @@ class UnitView extends StatefulWidget {
 
 class _UnitViewState extends State<UnitView> {
   late final coursePrefs = context.read<CoursePreferencesRepositoryBase>();
+  late final learnRepo = context.read<LearnRepositoryBase>();
 
   late Future<List<Map<String, dynamic>>> hskFuture;
   late Future<List<Map<String, dynamic>>> sentencesFuture;
@@ -37,16 +38,16 @@ class _UnitViewState extends State<UnitView> {
   @override
   initState() {
     super.initState();
-    sentencesFuture = LearnSql.getSentences(widget.unit);
-    hskFuture = LearnSql.getUnitWithLiteralMeaning(widget.unit);
-    subunitFuture = LearnSql.getSubunitInfo(unit: widget.unit);
+    sentencesFuture = learnRepo.getSentences(widget.unit);
+    hskFuture = learnRepo.getUnitWithLiteralMeaning(widget.unit);
+    subunitFuture = learnRepo.getSubunitInfo(unit: widget.unit);
   }
 
-  updateUnits() {
+  void updateUnits() {
     setState(() {
       widget.updateUnits();
-      hskFuture = LearnSql.getUnitWithLiteralMeaning(widget.unit);
-      subunitFuture = LearnSql.getSubunitInfo(unit: widget.unit);
+      hskFuture = learnRepo.getUnitWithLiteralMeaning(widget.unit);
+      subunitFuture = learnRepo.getSubunitInfo(unit: widget.unit);
     });
   }
 
@@ -117,12 +118,12 @@ class _UnitViewState extends State<UnitView> {
                                   );
                                 }
                                 for (int i = 0; i < unitLength.length; i++) {
-                                  LearnSql.completeSubUnit(
+                                  learnRepo.completeSubUnit(
                                     unit: widget.unit,
                                     subUnit: i + 1,
                                   );
                                 }
-                                LearnSql.completeUnit(unit: widget.unit);
+                                learnRepo.completeUnit(unit: widget.unit);
                               },
                               child: const Text("Complete Unit"),
                             ),
@@ -240,7 +241,7 @@ class _UnitViewState extends State<UnitView> {
                                               ).then((_) {
                                                 setState(() {
                                                   subunitFuture =
-                                                      LearnSql.getSubunitInfo(
+                                                      learnRepo.getSubunitInfo(
                                                         unit: widget.unit,
                                                       );
                                                 });

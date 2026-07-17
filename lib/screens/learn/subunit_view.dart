@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/repositories/course_preferences_repository.dart';
+import 'package:hsk_learner/repositories/learn_repository.dart';
 import 'package:hsk_learner/screens/learn/unit_learn.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:provider/provider.dart';
-import '../../sql/learn_sql.dart';
 import '../../widgets/hsk_listview/hsk_listview.dart';
 import '../games/unit_game.dart';
 
@@ -36,6 +36,7 @@ class SubunitView extends StatefulWidget {
 
 class _SubunitViewState extends State<SubunitView> {
   late final coursePrefs = context.read<CoursePreferencesRepositoryBase>();
+  late final learnRepo = context.read<LearnRepositoryBase>();
   late final _audioService = context.read<AudioServiceBase>();
   late Future<List<Map<String, dynamic>>> sentenceList;
   late final bool debug = coursePrefs.debug;
@@ -43,7 +44,7 @@ class _SubunitViewState extends State<SubunitView> {
 
   @override
   void initState() {
-    sentenceList = LearnSql.getSentencesForSubunit(widget.unit, widget.subunit);
+    sentenceList = learnRepo.getSentencesForSubunit(widget.unit, widget.subunit);
     super.initState();
   }
 

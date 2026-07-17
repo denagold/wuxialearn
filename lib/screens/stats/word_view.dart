@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/repositories/word_repository.dart';
 import 'package:hsk_learner/screens/stats/character_view.dart';
 import 'package:hsk_learner/utils/prototype.dart';
 import 'package:intl/intl.dart';
-
-import '../../sql/word_view_sql.dart';
+import 'package:provider/provider.dart';
 
 class WordView extends StatefulWidget {
   final int wordId;
@@ -14,14 +14,15 @@ class WordView extends StatefulWidget {
 }
 
 class _WordViewState extends State<WordView> {
+  late final WordRepositoryBase wordRepo = context.read<WordRepositoryBase>();
   late Future<List<Map<String, dynamic>>> literalMeaning;
   late Future<List<Map<String, dynamic>>> sentencesFuture;
 
   @override
   initState() {
     super.initState();
-    literalMeaning = WordViewSql.getWordInfo(widget.wordId);
-    sentencesFuture = WordViewSql.getSentenceFromId(widget.wordId);
+    literalMeaning = wordRepo.getWordInfo(widget.wordId);
+    sentencesFuture = wordRepo.getSentenceFromId(widget.wordId);
   }
 
   @override

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/repositories/course_preferences_repository.dart';
+import 'package:hsk_learner/repositories/learn_repository.dart';
 import 'package:hsk_learner/screens/learn/test_out.dart';
 import 'package:provider/provider.dart';
-import '../../sql/learn_sql.dart';
 import 'course_view.dart';
 
 class HSKCourseView extends StatefulWidget {
@@ -16,6 +16,8 @@ class HSKCourseView extends StatefulWidget {
 class _HSKCourseViewState extends State<HSKCourseView> {
   late Future<List<Map<String, dynamic>>> unitNumList;
   late final coursePrefs = context.read<CoursePreferencesRepositoryBase>();
+  late final learnRepo = context.read<LearnRepositoryBase>();
+
   @override
   void initState() {
     super.initState();
@@ -23,11 +25,11 @@ class _HSKCourseViewState extends State<HSKCourseView> {
   }
 
   Future<List<Map<String, dynamic>>> getUnitNum() async {
-    final data = await LearnSql.count2(courseName: 'hsk');
+    final data = await learnRepo.count2(courseName: 'hsk');
     return data;
   }
 
-  updateUnits() {
+  void updateUnits() {
     setState(() {
       unitNumList = getUnitNum();
     });

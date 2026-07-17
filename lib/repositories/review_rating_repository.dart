@@ -22,10 +22,10 @@ abstract class ReviewRatingRepositoryBase {
 /// Repository for handling all review ratings operations.
 /// Review ratings are holding the possible ratings for a given review.
 /// Examples like "Again", "Hard", "Easy", etc.
-class ReviewRatingRepository implements ReviewRatingRepositoryBase {
+class ReviewRatingRepositoryImpl implements ReviewRatingRepositoryBase {
   final ReviewRatingService _ratingService;
 
-  ReviewRatingRepository(this._ratingService);
+  ReviewRatingRepositoryImpl(this._ratingService);
 
   @override
   Future<List<ReviewRatingModel>> getAllReviewRatings() async {

@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
+import 'package:hsk_learner/repositories/learn_repository.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:provider/provider.dart';
-import '../../sql/learn_sql.dart';
 import '../stats/character_view.dart';
 
 class UnitLearn extends StatefulWidget {
@@ -33,6 +33,7 @@ class UnitLearn extends StatefulWidget {
 
 class _UnitLearnState extends State<UnitLearn> {
   late final _audioService = context.read<AudioServiceBase>();
+  late final learnRepo = context.read<LearnRepositoryBase>();
   late final appPrefs = context.read<AppPreferencesRepositoryBase>();
 
   final PageController _pageController = PageController();
@@ -48,12 +49,12 @@ class _UnitLearnState extends State<UnitLearn> {
   late List<Map<String, dynamic>> sentenceList = [];
 
   Future<List<Map<String, dynamic>>> getUnits(int index) async {
-    final data = await LearnSql.getExamples(widget.wordList[index].hanzi);
+    final data = await learnRepo.getExamples(widget.wordList[index].hanzi);
     return data;
   }
 
   Future<void> getSentenceList() async {
-    sentenceList = await LearnSql.getSentencesForSubunit(
+    sentenceList = await learnRepo.getSentencesForSubunit(
       widget.unit,
       widget.subunit,
     );

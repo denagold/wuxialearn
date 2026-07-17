@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/repositories/learn_repository.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
-import 'package:hsk_learner/sql/learn_sql.dart';
+import 'package:provider/provider.dart';
 
 class ReviewQuiz extends StatefulWidget {
   final Future<List<Map<String, dynamic>>> hskList;
@@ -12,6 +13,8 @@ class ReviewQuiz extends StatefulWidget {
 }
 
 class _ReviewQuizState extends State<ReviewQuiz> {
+  late final learnRepo = context.read<LearnRepositoryBase>();
+
   late Future<List<Map<String, List<Map<String, dynamic>>>>> hskMap;
   @override
   void initState() {
@@ -64,7 +67,7 @@ class _ReviewQuizState extends State<ReviewQuiz> {
   getSentenceList() async {
     List<Map<String, dynamic>> completedHskList = await widget.hskList;
     Future<Map<String, List<Map<String, dynamic>>>> getUnits(int index) async {
-      final data = await LearnSql.getExamples(completedHskList[index]["hanzi"]);
+      final data = await learnRepo.getExamples(completedHskList[index]["hanzi"]);
       Map<String, List<Map<String, dynamic>>> hskMap = {
         "hskList": [completedHskList[index]],
         "sentenceList": data,

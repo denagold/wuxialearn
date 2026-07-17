@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/repositories/learn_repository.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:provider/provider.dart';
 import '../../data_model/word_item.dart';
-import '../../sql/learn_sql.dart';
 import '../../sql/manage_review_sql.dart';
 import '../../sql/stats_sql.dart';
 import 'matching_game.dart';
@@ -39,6 +39,7 @@ class UnitGame extends StatefulWidget {
 
 class _UnitGameState extends State<UnitGame> {
   late final audioService = context.read<AudioServiceBase>();
+  late final learnRepo = context.read<LearnRepositoryBase>();
   final PageController _pageController = PageController();
   List<Widget> gamesList = [];
   int gameIndex = 0;
@@ -118,9 +119,9 @@ class _UnitGameState extends State<UnitGame> {
     bool lastPage = gameIndex + 1 == gamesList.length;
     if (lastPage) {
       if (widget.lastSubunit) {
-        LearnSql.completeUnit(unit: widget.unit);
+        learnRepo.completeUnit(unit: widget.unit);
       }
-      LearnSql.completeSubUnit(unit: widget.unit, subUnit: widget.subunit);
+      learnRepo.completeSubUnit(unit: widget.unit, subUnit: widget.subunit);
       //here is where we update the values for the other units
       widget.updateUnits();
       Navigator.pop(context);

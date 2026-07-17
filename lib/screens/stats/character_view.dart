@@ -58,7 +58,6 @@ class _CharacterViewState extends State<CharacterView> {
                 BuildContext context,
                 AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
               ) {
-                print("Data: ${snapshot.hasData}, Error: ${snapshot.error}, State: ${snapshot.connectionState}");
                 if (snapshot.hasData) {
                   final List<Map<String, dynamic>> stats = snapshot.data!;
                   return Column(

@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:hsk_learner/data_model/review_rating.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
+import 'package:hsk_learner/repositories/word_repository.dart';
 import 'package:hsk_learner/screens/stats/character_view.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:hsk_learner/sql/review_flashcards_sql.dart';
 import 'package:provider/provider.dart';
 
 import '../../sql/stats_sql.dart';
-import '../../sql/word_view_sql.dart';
 import '../../utils/prototype.dart';
 import 'flashcard.dart';
 
@@ -38,6 +38,7 @@ class ReviewFlashcards extends StatefulWidget {
 class _ReviewFlashcardsState extends State<ReviewFlashcards> {
   late final _audioService = context.read<AudioServiceBase>();
   late final appPrefs = context.read<AppPreferencesRepositoryBase>();
+  late final wordRepo = context.read<WordRepositoryBase>();
 
   bool lastPage = false;
   bool wasClicked = false;
@@ -212,7 +213,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
                             },
                             itemBuilder: (context, pageIndex) {
                               final sentencesFuture =
-                                  WordViewSql.getSentenceFromId(
+                                  wordRepo.getSentenceFromId(
                                     wordList[pageIndex].id,
                                   );
                               return Column(
@@ -506,7 +507,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
 
 class _ShowNextCardButton extends StatelessWidget {
   final Function() callback;
-  const _ShowNextCardButton({super.key, required this.callback});
+  const _ShowNextCardButton({required this.callback});
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -529,7 +530,7 @@ class _ShowNextCardButton extends StatelessWidget {
 class _AnswerButton extends StatelessWidget {
   final Function(int value) callback;
   final List<ReviewRating> ratings;
-  const _AnswerButton({super.key, required this.callback, required this.ratings});
+  const _AnswerButton({required this.callback, required this.ratings});
   @override
   Widget build(BuildContext context) {
     return Row(
