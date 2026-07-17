@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
 import 'package:hsk_learner/repositories/app_state_repository.dart';
+import 'package:hsk_learner/repositories/character_repository.dart';
 import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/sql/pg_update.dart';
 import 'package:hsk_learner/sql/preferences_sql.dart';
 import 'package:hsk_learner/sql/sql_helper.dart';
 import 'package:provider/provider.dart';
-import '../../sql/character_stokes_sql.dart';
 import '../../utils/platform_info.dart';
 import 'backup.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -26,6 +26,7 @@ class _SettingsState extends State<Settings> {
   late final _appState = context.read<AppStateRepositoryBase>();
   late final _coursePrefs = context.read<CoursePreferencesRepositoryBase>();
   late final _appPrefs = context.read<AppPreferencesRepositoryBase>();
+  late final _characterRepo = context.read<CharacterRepositoryBase>();
 
   late bool translation;
   late bool reviewPinyin;
@@ -367,13 +368,14 @@ class _SettingsState extends State<Settings> {
                         children: [
                           CupertinoButton(
                             onPressed:
+                                //TODO hide the button, to fix accidental multiple runs
                                 isDataDownloaded
                                     ? null
                                     : () async {
                                         setState(() {
                                           isDownloading = true;
                                         });
-                                        CharacterStokesSql.createTable()
+                                        _characterRepo.replaceCharacterDb()
                                             .then(
                                               (value) {
                                                 setSettingBool(
@@ -612,7 +614,7 @@ class _SettingsState extends State<Settings> {
                                 setState(() {
                                   isDeleting = true;
                                 });
-                                CharacterStokesSql.dropTable()
+                                _characterRepo.removeCharacterDb()
                                     .then(
                                       (value) {
                                         setSettingBool(

@@ -5,9 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:hsk_learner/constants/preference_constants.dart';
 import 'package:hsk_learner/repositories/app_state_repository.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
+import 'package:hsk_learner/repositories/character_repository.dart';
 import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/repositories/review_preferences_repository.dart';
+import 'package:hsk_learner/repositories/review_rating_repository.dart';
 import 'package:hsk_learner/services/audio_service.dart';
+import 'package:hsk_learner/services/database_service.dart';
 import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/services/theme_service.dart';
 import 'package:hsk_learner/utils/platform_info.dart';
@@ -16,7 +19,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hsk_learner/screens/home/load_app.dart';
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,12 +31,16 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+        // Services
+        Provider<ThemeServiceBase>(create: (context) => ThemeService()),
+        Provider<AudioServiceBase>(create: (context) => AudioService()),
+        Provider<DatabaseServiceBase>(create: (context) => DatabaseServiceImpl()),
+
+        // Preference related
         Provider<SharedPreferencesWithCache>(create: (_) => prefs),
         Provider<PreferencesServiceBase>(
           create: (ctx) => PreferencesService(ctx.read()),
         ),
-        Provider<ThemeServiceBase>(create: (context) => ThemeService()),
-        Provider<AudioServiceBase>(create: (context) => AudioService()),
         Provider<AppStateRepositoryBase>(
           create: (context) => AppStateRepositoryImpl(context.read()),
         ),
@@ -47,6 +53,10 @@ Future<void> main() async {
         Provider<AppPreferencesRepositoryBase>(
           create: (context) => AppPreferencesRepositoryImpl(context.read()),
         ),
+
+        // Review related
+        Provider<ReviewRatingRepositoryBase>(create: (context) => ReviewRatingRepositoryImpl(context.read())),
+        Provider<CharacterRepositoryBase>(create: (context) => CharacterRepositoryImpl(context.read())),
       ],
       child: const MyApp(fdroid: true),
     ),

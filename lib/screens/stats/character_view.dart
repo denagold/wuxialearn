@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
+import 'package:hsk_learner/repositories/character_repository.dart';
 import 'package:hsk_learner/screens/stats/svg.dart';
-import 'package:hsk_learner/sql/character_view_sql.dart';
 import 'package:hsk_learner/utils/prototype.dart';
 import 'package:hsk_learner/widgets/common/toggle_buttons.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +16,7 @@ class CharacterView extends StatefulWidget {
 
 class _CharacterViewState extends State<CharacterView> {
   late final appPrefs = context.read<AppPreferencesRepositoryBase>();
+  late final characterRepo = context.read<CharacterRepositoryBase>();
   late Future<List<Map<String, dynamic>>> literalMeaning;
   late Future<List<Map<String, dynamic>>> sentencesFuture;
   bool showPinyin = true;
@@ -23,9 +24,9 @@ class _CharacterViewState extends State<CharacterView> {
 
   @override
   initState() {
+    literalMeaning = characterRepo.getCharInfo(widget.character);
+    sentencesFuture = characterRepo.getSentenceFromId(widget.character);
     super.initState();
-    literalMeaning = CharacterViewSql.getCharInfo(widget.character);
-    sentencesFuture = CharacterViewSql.getSentenceFromId(widget.character);
   }
 
   @override
@@ -57,6 +58,7 @@ class _CharacterViewState extends State<CharacterView> {
                 BuildContext context,
                 AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
               ) {
+                print("Data: ${snapshot.hasData}, Error: ${snapshot.error}, State: ${snapshot.connectionState}");
                 if (snapshot.hasData) {
                   final List<Map<String, dynamic>> stats = snapshot.data!;
                   return Column(
