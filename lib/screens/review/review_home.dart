@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hsk_learner/data_model/review_rating.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
 import 'package:hsk_learner/repositories/review_preferences_repository.dart';
+import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/screens/review/review_flashcards.dart';
 import 'package:hsk_learner/screens/review/review_progress.dart';
 import 'package:hsk_learner/screens/review/review_quiz.dart';
@@ -10,7 +11,6 @@ import 'package:hsk_learner/widgets/collapsible.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 import 'package:hsk_learner/widgets/hsk_listview/hsk_listview.dart';
 import 'package:provider/provider.dart';
-import '../../sql/review_sql.dart';
 import '../../widgets/size_transition.dart';
 import '../../utils/styles.dart';
 import 'manage_ratings.dart';
@@ -88,11 +88,11 @@ const quizType = "Quiz (ungraded)";
 class _ReviewPageState extends State<ReviewPage> {
   late final reviewPrefs = context.read<ReviewPreferencesRepositoryBase>();
   late final appPrefs = context.read<AppPreferencesRepositoryBase>();
+  late final reviewRepo = context.read<ReviewRepositoryBase>();
 
   late Future<List<Map<String, dynamic>>> hskList;
   late List<Future<List<Map<String, dynamic>>>> sentenceList;
-  Future<List<Map<String, dynamic>>> reviewRatingFuture =
-      ReviewSql.getReviewRatings();
+  late Future<List<Map<String, dynamic>>> reviewRatingFuture;
   bool lastPage = false;
   int numCards = -1;
   bool previewDeck = false;
@@ -127,6 +127,7 @@ class _ReviewPageState extends State<ReviewPage> {
     showPinyin = appPrefs.showPinyinByDefaultInReview;
     _loadReviewType();
     hskList = getReview();
+    reviewRatingFuture = reviewRepo.getReviewRatings();
   }
 
   void _loadReviewType() {
@@ -164,10 +165,10 @@ class _ReviewPageState extends State<ReviewPage> {
     List<Map<String, dynamic>> reviewList = [];
     switch (reviewWordsValue) {
       case "SRS":
-        reviewList = await ReviewSql.getSrsReview(deckSize: numCards);
+        reviewList = await reviewRepo.getSrsReview(deckSize: numCards);
         break;
       case "random words":
-        reviewList = await ReviewSql.getReview(
+        reviewList = await reviewRepo.getReview(
           deckSize: numCards,
           sortBy: "RANDOM()",
           orderBy: "ASC",
@@ -175,7 +176,7 @@ class _ReviewPageState extends State<ReviewPage> {
         );
         break;
       case "difficult words":
-        reviewList = await ReviewSql.getReview(
+        reviewList = await reviewRepo.getReview(
           deckSize: numCards,
           sortBy: "score",
           orderBy: "ASC",
@@ -183,7 +184,7 @@ class _ReviewPageState extends State<ReviewPage> {
         );
         break;
       case "old words":
-        reviewList = await ReviewSql.getReview(
+        reviewList = await reviewRepo.getReview(
           deckSize: numCards,
           sortBy: "last_seen",
           orderBy: "ASC",
@@ -191,7 +192,7 @@ class _ReviewPageState extends State<ReviewPage> {
         );
         break;
       case "uncategorized": // Handle new option
-        reviewList = await ReviewSql.getUncategorizedWords(
+        reviewList = await reviewRepo.getUncategorizedWords(
           deck: deckName,
           deckSize: numCards,
         );
@@ -421,7 +422,7 @@ class _ReviewPageState extends State<ReviewPage> {
     );
   }
 
-  _showReviewWordsActionSheet<bool>(BuildContext context) {
+  void _showReviewWordsActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -447,7 +448,7 @@ class _ReviewPageState extends State<ReviewPage> {
     );
   }
 
-  _showReviewTypeActionSheet<bool>(BuildContext context) {
+  void _showReviewTypeActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -473,7 +474,7 @@ class _ReviewPageState extends State<ReviewPage> {
     );
   }
 
-  _showReviewSizeActionSheet<bool>(BuildContext context) {
+  void _showReviewSizeActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -499,7 +500,7 @@ class _ReviewPageState extends State<ReviewPage> {
     );
   }
 
-  _showReviewDeckActionSheet<bool>(BuildContext context) {
+  void _showReviewDeckActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:

@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
+import 'package:provider/provider.dart';
 
 import '../../data_model/word_item.dart';
-import '../../sql/manage_review_sql.dart';
 import '../../utils/styles.dart';
 import '../stats/word_view.dart';
 
@@ -15,6 +16,7 @@ class ManageReview extends StatefulWidget {
 }
 
 class _ManageReviewState extends State<ManageReview> {
+  late final reviewRepo = context.read<ReviewRepositoryBase>();
   late Future<List<Map<String, dynamic>>> statsListFuture;
   String sortValue = "Score";
   String orderValue = "Ascending";
@@ -33,7 +35,7 @@ class _ManageReviewState extends State<ManageReview> {
     required String orderBy,
     required String deck,
   }) async {
-    final data = await ManageReviewSql.getManageReview(
+    final data = await reviewRepo.getManageReview(
       sortBy: sortBy,
       orderBy: orderBy,
       deckSize: -1,
@@ -83,11 +85,11 @@ class _ManageReviewState extends State<ManageReview> {
     return deckName != "Any";
   }
 
-  onClick(int id) {
+  Future<void> onClick(int id) async {
     List<String> options = [...deckNames];
     options.remove(deckName);
     if (showRemove()) {
-      ManageReviewSql.removeFromDeck(id: id, deck: deckName);
+      reviewRepo.removeFromDeck(id: id, deck: deckName);
     } else {
       showCupertinoDialog(
         barrierDismissible: true,
@@ -109,7 +111,7 @@ class _ManageReviewState extends State<ManageReview> {
                     children: List.generate(options.length, (index) {
                       return TextButton(
                         onPressed: () {
-                          ManageReviewSql.addToReviewDeck(
+                          reviewRepo.addToReviewDeck(
                             id: id,
                             deck: options[index],
                             value: true,
@@ -206,7 +208,7 @@ class _ManageReviewState extends State<ManageReview> {
     );
   }
 
-  _showSortByActionSheet<bool>(BuildContext context) {
+  void _showSortByActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -231,7 +233,7 @@ class _ManageReviewState extends State<ManageReview> {
     );
   }
 
-  _showOrderByActionSheet<bool>(BuildContext context) {
+  void _showOrderByActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -256,7 +258,7 @@ class _ManageReviewState extends State<ManageReview> {
     );
   }
 
-  _showReviewDeckActionSheet<bool>(BuildContext context) {
+  void _showReviewDeckActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -293,7 +295,6 @@ class _HskListview extends StatelessWidget {
   final bool showRemove;
 
   const _HskListview({
-    super.key,
     required this.statsListFuture,
     required this.showTranslation,
     required this.connectTop,
@@ -303,7 +304,7 @@ class _HskListview extends StatelessWidget {
     required this.showRemove,
   });
 
-  playCallback(int i) {
+  void playCallback(int i) {
     onClick(i);
   }
 
@@ -373,7 +374,6 @@ class _HskListviewItem extends StatelessWidget {
   final Function(int) callback;
   final bool showRemove;
   const _HskListviewItem({
-    super.key,
     required this.wordItem,
     required this.showTranslation,
     required this.separator,

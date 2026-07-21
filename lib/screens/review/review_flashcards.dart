@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:hsk_learner/data_model/review_rating.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
+import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/repositories/stat_repository.dart';
 import 'package:hsk_learner/repositories/word_repository.dart';
 import 'package:hsk_learner/screens/stats/character_view.dart';
 import 'package:hsk_learner/services/audio_service.dart';
-import 'package:hsk_learner/sql/review_flashcards_sql.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/prototype.dart';
@@ -40,6 +40,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
   late final appPrefs = context.read<AppPreferencesRepositoryBase>();
   late final wordRepo = context.read<WordRepositoryBase>();
   late final statRepo = context.read<StatRepositoryBase>();
+  late final reviewRepo = context.read<ReviewRepositoryBase>();
 
   bool lastPage = false;
   bool wasClicked = false;
@@ -105,7 +106,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
         );
       }
       final int time = dateTime.toUtc().millisecondsSinceEpoch ~/ 1000;
-      ReviewFlashcardsSql.updateReview(id: id, time: time, ratingId: rating.id);
+      reviewRepo.updateReview(id: id, time: time, ratingId: rating.id);
       widget.update();
       /*
       still needs some thought on what we should do here

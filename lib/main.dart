@@ -22,6 +22,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hsk_learner/screens/home/load_app.dart';
 
 import 'repositories/learn_repository.dart';
+import 'repositories/review_repository.dart';
 import 'repositories/stat_repository.dart';
 
 Future<void> main() async {
@@ -64,6 +65,7 @@ Future<void> main() async {
         Provider<ReviewRatingRepositoryBase>(create: (context) => ReviewRatingRepositoryImpl(context.read())),
         Provider<WordRepositoryBase>(create: (context) => WordRepositoryImpl(context.read())),
         Provider<StatRepositoryBase>(create: (context) => StatRepositoryImpl(context.read())),
+        Provider<ReviewRepositoryBase>(create: (context) => ReviewRepositoryImpl(context.read())),
 
       ],
       child: const MyApp(fdroid: true),

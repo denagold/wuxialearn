@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/sql/review_sql.dart';
+import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
+import 'package:provider/provider.dart';
 
 import '../../data_model/review_rating.dart';
 
@@ -13,11 +14,18 @@ class ManageRatings extends StatefulWidget {
 }
 
 class _ManageRatingsState extends State<ManageRatings> {
-  Future<List<Map<String, dynamic>>> ratingsFuture =
-      ReviewSql.getReviewRatings();
+  late final reviewRepo = context.read<ReviewRepositoryBase>();
+  late Future<List<Map<String, dynamic>>> ratingsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    ratingsFuture = reviewRepo.getReviewRatings();
+  }
+
   void update() {
     setState(() {
-      ratingsFuture = ReviewSql.getReviewRatings();
+      ratingsFuture = reviewRepo.getReviewRatings();
     });
   }
 
@@ -69,6 +77,7 @@ class _ManageRatingsState extends State<ManageRatings> {
                                           child: _EditReviewRatingForm(
                                             rating: rating,
                                             update: update,
+                                            reviewRepo: reviewRepo,
                                           ),
                                         ),
                                   );
@@ -77,7 +86,7 @@ class _ManageRatingsState extends State<ManageRatings> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  ReviewSql.deleteRating(id: rating.id);
+                                  reviewRepo.deleteRating(id: rating.id);
                                   update();
                                 },
                                 child: const Text("delete"),
@@ -97,7 +106,7 @@ class _ManageRatingsState extends State<ManageRatings> {
                     context: context,
                     builder:
                         (BuildContext context) =>
-                            Dialog(child: _AddReviewRatingForm(update: update)),
+                            Dialog(child: _AddReviewRatingForm(reviewRepo: reviewRepo, update: update)),
                   );
                 },
                 child: const Text("add"),
@@ -113,8 +122,9 @@ class _ManageRatingsState extends State<ManageRatings> {
 }
 
 class _AddReviewRatingForm extends StatefulWidget {
+  final ReviewRepositoryBase reviewRepo;
   final Function update;
-  const _AddReviewRatingForm({required this.update});
+  const _AddReviewRatingForm({required this.reviewRepo, required this.update});
 
   @override
   State<_AddReviewRatingForm> createState() => _AddReviewRatingFormState();
@@ -123,7 +133,7 @@ class _AddReviewRatingForm extends StatefulWidget {
 class _AddReviewRatingFormState extends State<_AddReviewRatingForm> {
   final GlobalKey<FormState> key = GlobalKey<FormState>();
   void update(String name, int start, int end) {
-    ReviewSql.insertRating(name: name, start: start, end: end);
+    widget.reviewRepo.insertRating(name: name, start: start, end: end);
     widget.update();
   }
 
@@ -134,9 +144,10 @@ class _AddReviewRatingFormState extends State<_AddReviewRatingForm> {
 }
 
 class _EditReviewRatingForm extends StatefulWidget {
-  const _EditReviewRatingForm({required this.rating, required this.update});
+  const _EditReviewRatingForm({required this.rating, required this.update, required this.reviewRepo});
   final ReviewRating rating;
   final Function update;
+  final ReviewRepositoryBase reviewRepo;
 
   @override
   State<_EditReviewRatingForm> createState() => _EditReviewRatingFormState();
@@ -150,7 +161,7 @@ class _EditReviewRatingFormState extends State<_EditReviewRatingForm> {
   late String startInterval;
   late String endInterval;
   void update(String name, int start, int end) {
-    ReviewSql.setReviewRating(
+    widget.reviewRepo.setReviewRating(
       id: widget.rating.id,
       name: name,
       start: start,
@@ -336,7 +347,7 @@ class _RatingsFormState extends State<_RatingsForm> {
     );
   }
 
-  _showStartIntervalActionSheet<bool>(BuildContext context) {
+  void _showStartIntervalActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -360,7 +371,7 @@ class _RatingsFormState extends State<_RatingsForm> {
     );
   }
 
-  _showEndIntervalActionSheet<bool>(BuildContext context) {
+  void _showEndIntervalActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:

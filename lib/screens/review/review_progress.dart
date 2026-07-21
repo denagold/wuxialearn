@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:hsk_learner/sql/review_sql.dart';
+import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
+import 'package:provider/provider.dart';
 
 class ReviewProgress extends StatefulWidget {
   const ReviewProgress({super.key});
@@ -13,10 +14,11 @@ class _ReviewProgressState extends State<ReviewProgress> {
   List<String> deckNames = ["hsk", "wuxia", "any"];
   String deckName = "hsk";
   late Future<List<Map<String, dynamic>>> progressFuture;
+  late final reviewRepo = context.read<ReviewRepositoryBase>();
   @override
   void initState() {
-    ReviewSql.test(deck: deckName);
-    progressFuture = ReviewSql.getProgress(deck: deckName);
+    reviewRepo.test(deck: deckName);
+    progressFuture = reviewRepo.getProgress(deck: deckName);
     super.initState();
   }
 
@@ -78,7 +80,7 @@ class _ReviewProgressState extends State<ReviewProgress> {
     );
   }
 
-  _showReviewDeckActionSheet<bool>(BuildContext context) {
+  void _showReviewDeckActionSheet<bool>(BuildContext context) {
     showCupertinoModalPopup<bool>(
       context: context,
       builder:
@@ -93,7 +95,7 @@ class _ReviewProgressState extends State<ReviewProgress> {
                     Navigator.pop(context, true);
                     setState(() {
                       deckName = deckNames[index];
-                      progressFuture = ReviewSql.getProgress(deck: deckName);
+                      progressFuture = reviewRepo.getProgress(deck: deckName);
                     });
                   },
                   child: Text(deckNames[index]),
