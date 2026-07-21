@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/legacy_data_model/word_item.dart';
 import 'package:hsk_learner/repositories/stat_repository.dart';
 import 'package:hsk_learner/screens/stats/stats.dart';
 import 'package:hsk_learner/screens/stats/word_view.dart';
@@ -7,7 +8,6 @@ import 'package:hsk_learner/utils/large_text.dart';
 import 'package:hsk_learner/utils/prototype.dart';
 import 'package:hsk_learner/utils/styles.dart';
 import 'package:provider/provider.dart';
-import '../../data_model/word_item.dart';
 import 'chart.dart';
 import '../../widgets/hsk_listview/hsk_listview.dart';
 

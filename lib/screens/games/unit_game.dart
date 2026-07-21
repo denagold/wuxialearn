@@ -7,7 +7,7 @@ import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/repositories/stat_repository.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:provider/provider.dart';
-import '../../data_model/word_item.dart';
+import '../../legacy_data_model/word_item.dart';
 import 'matching_game.dart';
 import 'multiple_choice_game.dart';
 import 'sentence_game.dart';

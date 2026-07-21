@@ -59,13 +59,15 @@ Future<void> main() async {
           create: (context) => ReviewPreferencesRepositoryImpl(context.read()),
         ),
 
-        // Review related
+        // Repositories
         Provider<CharacterRepositoryBase>(create: (context) => CharacterRepositoryImpl(context.read())),
         Provider<LearnRepositoryBase>(create: (context) => LearnRepositoryImpl(context.read())),
-        Provider<ReviewRatingRepositoryBase>(create: (context) => ReviewRatingRepositoryImpl(context.read())),
         Provider<WordRepositoryBase>(create: (context) => WordRepositoryImpl(context.read())),
         Provider<StatRepositoryBase>(create: (context) => StatRepositoryImpl(context.read())),
         Provider<ReviewRepositoryBase>(create: (context) => ReviewRepositoryImpl(context.read())),
+
+        // Review related
+        Provider<ReviewRatingRepositoryBase>(create: (context) => ReviewRatingRepositoryImpl(context.read())),
 
       ],
       child: const MyApp(fdroid: true),

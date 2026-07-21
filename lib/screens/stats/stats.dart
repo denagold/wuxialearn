@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/legacy_data_model/word_item.dart';
 import 'package:hsk_learner/repositories/stat_repository.dart';
 import 'package:hsk_learner/screens/stats/word_view.dart';
 import 'package:hsk_learner/services/audio_service.dart';

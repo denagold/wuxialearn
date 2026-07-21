@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/legacy_data_model/word_item.dart';
 import '../../sql/test_out_sql.dart';
 import '../games/multiple_choice_game.dart';
 import '../games/unit_game.dart';

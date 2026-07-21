@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/legacy_data_model/review_rating.dart';
 import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 import 'package:provider/provider.dart';
 
-import '../../data_model/review_rating.dart';
 
 class ManageRatings extends StatefulWidget {
   const ManageRatings({super.key});

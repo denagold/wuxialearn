@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/legacy_data_model/word_item.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 import 'package:hsk_learner/utils/large_text.dart';

@@ -1,3 +1,5 @@
+import 'package:hsk_learner/extensions/review_rating_extensions.dart';
+
 final class ReviewRatingModel {
   final int id;
   final String name;
@@ -30,4 +32,31 @@ final class ReviewRatingModel {
   String toString() {
     return 'ReviewRatingModel(id: $id, name: $name, start: $durationStart, end: $durationEnd)';
   }
+
+  String startIntervalValue() {
+    return ReviewRatingInterval.intervalValue(durationStart);
+  }
+
+  String startInterval() {
+    return ReviewRatingInterval.intervalUnit(durationStart);
+  }
+
+  String endIntervalValue() {
+    return ReviewRatingInterval.intervalValue(durationEnd);
+  }
+
+  String endInterval() {
+    return ReviewRatingInterval.intervalUnit(durationEnd);
+  }
+
+  String interval() {
+    return ReviewRatingInterval.formatInterval(durationStart, durationEnd);
+  }
+}
+
+List<ReviewRatingModel> createReviewRatingModel(List<Map<String, dynamic>> data) {
+  return List.generate(
+    data.length,
+    (index) => ReviewRatingModel.fromMap(data[index]),
+  );
 }

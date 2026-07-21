@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/legacy_data_model/word_item.dart';
 import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:hsk_learner/utils/large_text.dart';
