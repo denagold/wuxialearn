@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/repositories/stat_repository.dart';
 import 'package:hsk_learner/screens/stats/stats.dart';
 import 'package:hsk_learner/screens/stats/word_view.dart';
-import 'package:hsk_learner/sql/stats_sql.dart';
 import 'package:hsk_learner/utils/large_text.dart';
 import 'package:hsk_learner/utils/prototype.dart';
 import 'package:hsk_learner/utils/styles.dart';
+import 'package:provider/provider.dart';
 import '../../data_model/word_item.dart';
 import 'chart.dart';
 import '../../widgets/hsk_listview/hsk_listview.dart';
@@ -23,10 +24,12 @@ class _StatsHomeState extends State<StatsHome> {
   late Future<List<Map<String, dynamic>>> statsListFuture;
   late Future<List<Map<String, dynamic>>> timelineList;
   late Future<List<Map<String, dynamic>>> globalStats;
+  late StatRepositoryBase statRepo;
 
   @override
-  initState() {
+  void initState() {
     super.initState();
+    statRepo = context.read<StatRepositoryBase>();
     weakHskList = getStats(
       sortBy: "percent_correct",
       orderBy: "ASC",
@@ -38,7 +41,7 @@ class _StatsHomeState extends State<StatsHome> {
       orderBy: "DESC",
       deckSize: 10,
     );
-    statsListFuture = StatsSql.getOverview();
+    statsListFuture = statRepo.getOverview();
     timelineList = getTimeLine(sortBy: "string_date", orderBy: "ASC");
     globalStats = getGlobalStats();
   }
@@ -49,7 +52,7 @@ class _StatsHomeState extends State<StatsHome> {
     required int deckSize,
     String where = "",
   }) async {
-    return await StatsSql.getStats(
+    return await statRepo.getStats(
       sortBy: sortBy,
       orderBy: orderBy,
       deckSize: deckSize,
@@ -58,14 +61,14 @@ class _StatsHomeState extends State<StatsHome> {
   }
 
   Future<List<Map<String, dynamic>>> getGlobalStats() async {
-    return await StatsSql.getTotalStats();
+    return await statRepo.getTotalStats();
   }
 
   Future<List<Map<String, dynamic>>> getTimeLine({
     required String sortBy,
     required String orderBy,
   }) async {
-    return await StatsSql.getTimeline(
+    return await statRepo.getTimeline(
       sortBy: sortBy,
       orderBy: orderBy,
       deckSize: -1,

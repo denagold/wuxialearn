@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
+import 'package:hsk_learner/repositories/stat_repository.dart';
 import 'package:hsk_learner/screens/stats/word_view.dart';
 import 'package:hsk_learner/services/audio_service.dart';
-import 'package:hsk_learner/sql/stats_sql.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/styles.dart';
@@ -17,13 +17,15 @@ class StatsPage extends StatefulWidget {
 
 class _StatsPageState extends State<StatsPage> {
   late Future<List<Map<String, dynamic>>> statsListFuture;
+  late StatRepositoryBase statRepo;
   String sortValue = "Score";
   String orderValue = "Ascending";
   List<String> sortOptions = ["Score", "Last Seen", "Unit"];
   List<String> orderOption = ["Ascending", "Descending"];
   @override
-  initState() {
+  void initState() {
     super.initState();
+    statRepo = context.read<StatRepositoryBase>();
     refresh();
   }
 
@@ -31,7 +33,7 @@ class _StatsPageState extends State<StatsPage> {
     required String sortBy,
     required String orderBy,
   }) async {
-    final data = await StatsSql.getStats(
+    final data = await statRepo.getStats(
       sortBy: sortBy,
       orderBy: orderBy,
       deckSize: -1,

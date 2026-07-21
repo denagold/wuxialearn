@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:hsk_learner/data_model/review_rating.dart';
 import 'package:hsk_learner/data_model/word_item.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
+import 'package:hsk_learner/repositories/stat_repository.dart';
 import 'package:hsk_learner/repositories/word_repository.dart';
 import 'package:hsk_learner/screens/stats/character_view.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:hsk_learner/sql/review_flashcards_sql.dart';
 import 'package:provider/provider.dart';
 
-import '../../sql/stats_sql.dart';
 import '../../utils/prototype.dart';
 import 'flashcard.dart';
 
@@ -39,6 +39,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
   late final _audioService = context.read<AudioServiceBase>();
   late final appPrefs = context.read<AppPreferencesRepositoryBase>();
   late final wordRepo = context.read<WordRepositoryBase>();
+  late final statRepo = context.read<StatRepositoryBase>();
 
   bool lastPage = false;
   bool wasClicked = false;
@@ -91,7 +92,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
   answerButtonCallBack(int id) {
     return (int value) async {
       int stat = value == 0 || value == 1 ? 0 : 1;
-      StatsSql.insertStat(value: stat, id: id);
+      statRepo.insertStat(value: stat, id: id);
       ReviewRating rating = widget.ratings.firstWhere(
         (element) => element.id == value,
       );

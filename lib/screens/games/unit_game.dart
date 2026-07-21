@@ -3,11 +3,11 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/repositories/learn_repository.dart';
+import 'package:hsk_learner/repositories/stat_repository.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:provider/provider.dart';
 import '../../data_model/word_item.dart';
 import '../../sql/manage_review_sql.dart';
-import '../../sql/stats_sql.dart';
 import 'matching_game.dart';
 import 'multiple_choice_game.dart';
 import 'sentence_game.dart';
@@ -40,6 +40,7 @@ class UnitGame extends StatefulWidget {
 class _UnitGameState extends State<UnitGame> {
   late final audioService = context.read<AudioServiceBase>();
   late final learnRepo = context.read<LearnRepositoryBase>();
+  late final statRepo = context.read<StatRepositoryBase>();
   final PageController _pageController = PageController();
   List<Widget> gamesList = [];
   int gameIndex = 0;
@@ -72,7 +73,7 @@ class _UnitGameState extends State<UnitGame> {
   void callback(bool value, WordItem currWord, bool? chineseToEnglish) async {
     if (widget.unit > 0 && chineseToEnglish != null) {
       final int result = value ? 1 : 0;
-      StatsSql.insertStat(value: result, id: currWord.id);
+      statRepo.insertStat(value: result, id: currWord.id);
       ManageReviewSql.addToReviewDeck(
         id: currWord.id,
         deck: widget.courseName,

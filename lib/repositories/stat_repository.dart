@@ -1,12 +1,38 @@
-import 'package:hsk_learner/sql/sql_helper.dart';
+import 'package:hsk_learner/services/database_service.dart';
 
-class StatsSql {
-  static Future<List<Map<String, dynamic>>> getTimeline({
+abstract class StatRepositoryBase {
+  Future<List<Map<String, dynamic>>> getTimeline({
+    required int deckSize,
+    required String sortBy,
+    required String orderBy,
+  });
+
+  Future<List<Map<String, dynamic>>> getOverview();
+
+  Future<List<Map<String, dynamic>>> getTotalStats();
+
+  Future<List<Map<String, dynamic>>> getStats({
+    required int deckSize,
+    required String sortBy,
+    required String orderBy,
+    String where = "",
+  });
+
+  Future<void> insertStat({required int value, required int id});
+}
+
+class StatRepositoryImpl implements StatRepositoryBase {
+  final DatabaseServiceBase dbService;
+
+  StatRepositoryImpl(this.dbService);
+
+  @override
+  Future<List<Map<String, dynamic>>> getTimeline({
     required int deckSize,
     required String sortBy,
     required String orderBy,
   }) async {
-    final db = await SQLHelper.db();
+    final db = await dbService.database;
     return db.rawQuery("""
     SELECT string_date, right_occurrence, wrong_occurrence, 
     new_word,
@@ -28,8 +54,9 @@ class StatsSql {
     """);
   }
 
-  static Future<List<Map<String, dynamic>>> getOverview() async {
-    final db = await SQLHelper.db();
+  @override
+  Future<List<Map<String, dynamic>>> getOverview() async {
+    final db = await dbService.database;
     const sql = """
     SELECT new_words, total_words - new_words as review_words, percent_correct, most_seen, most_seen_id
 	FROM
@@ -69,8 +96,9 @@ class StatsSql {
     return result;
   }
 
-  static Future<List<Map<String, dynamic>>> getTotalStats() async {
-    final db = await SQLHelper.db();
+  @override
+  Future<List<Map<String, dynamic>>> getTotalStats() async {
+    final db = await dbService.database;
     const sql = """
     SELECT * FROM
       (SELECT
@@ -123,13 +151,14 @@ class StatsSql {
     return result;
   }
 
-  static Future<List<Map<String, dynamic>>> getStats({
+  @override
+  Future<List<Map<String, dynamic>>> getStats({
     required int deckSize,
     required String sortBy,
     required String orderBy,
     String where = "",
   }) async {
-    final db = await SQLHelper.db();
+    final db = await dbService.database;
     return db.rawQuery("""
     SELECT courses.id, right_occurrence, wrong_occurrence, 
     courses.hanzi, courses.hsk, courses.pinyin, courses.translations0,
@@ -154,8 +183,9 @@ class StatsSql {
     """);
   }
 
-  static void insertStat({required int value, required int id}) async {
-    final db = await SQLHelper.db();
+  @override
+  Future<void> insertStat({required int value, required int id}) async {
+    final db = await dbService.database;
     await db.rawInsert(
       "INSERT INTO stats(date, wordid, value) VALUES(strftime('%s', 'now'), $id, $value)",
     );
