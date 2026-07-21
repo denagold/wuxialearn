@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/legacy_data_model/review_rating.dart';
+import 'package:hsk_learner/models/review_rating.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
 import 'package:hsk_learner/repositories/review_preferences_repository.dart';
 import 'package:hsk_learner/repositories/review_repository.dart';
@@ -376,7 +376,7 @@ class _ReviewPageState extends State<ReviewPage> {
                       AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
                     ) {
                       if (snapshot.hasData) {
-                        List<ReviewRating> ratings = createReviewRating(
+                        List<ReviewRatingModel> ratings = createReviewRatingModel(
                           snapshot.data!,
                         );
                         return TextButton(

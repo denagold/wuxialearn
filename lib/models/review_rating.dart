@@ -33,25 +33,16 @@ final class ReviewRatingModel {
     return 'ReviewRatingModel(id: $id, name: $name, start: $durationStart, end: $durationEnd)';
   }
 
-  String startIntervalValue() {
-    return ReviewRatingInterval.intervalValue(durationStart);
-  }
+  String startIntervalValue() => intervalValue(durationStart);
 
-  String startInterval() {
-    return ReviewRatingInterval.intervalUnit(durationStart);
-  }
+  String startInterval() => intervalUnit(durationStart);
 
-  String endIntervalValue() {
-    return ReviewRatingInterval.intervalValue(durationEnd);
-  }
+  String endIntervalValue() => intervalValue(durationEnd);
 
-  String endInterval() {
-    return ReviewRatingInterval.intervalUnit(durationEnd);
-  }
+  String endInterval() => intervalUnit(durationEnd);
 
-  String interval() {
-    return ReviewRatingInterval.formatInterval(durationStart, durationEnd);
-  }
+  String interval() => formatInterval(durationStart, durationEnd);
+
 }
 
 List<ReviewRatingModel> createReviewRatingModel(List<Map<String, dynamic>> data) {

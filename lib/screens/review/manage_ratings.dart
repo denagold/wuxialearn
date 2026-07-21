@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/legacy_data_model/review_rating.dart';
+import 'package:hsk_learner/models/review_rating.dart';
 import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 import 'package:provider/provider.dart';
@@ -38,7 +38,7 @@ class _ManageRatingsState extends State<ManageRatings> {
         AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
       ) {
         if (snapshot.hasData) {
-          final ratings = createReviewRating(snapshot.data!);
+          final ratings = createReviewRatingModel(snapshot.data!);
           return Column(
             children: [
               const SizedBox(height: 5),
@@ -145,7 +145,7 @@ class _AddReviewRatingFormState extends State<_AddReviewRatingForm> {
 
 class _EditReviewRatingForm extends StatefulWidget {
   const _EditReviewRatingForm({required this.rating, required this.update, required this.reviewRepo});
-  final ReviewRating rating;
+  final ReviewRatingModel rating;
   final Function update;
   final ReviewRepositoryBase reviewRepo;
 

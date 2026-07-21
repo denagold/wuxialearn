@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/legacy_data_model/review_rating.dart';
+import 'package:hsk_learner/models/review_rating.dart';
 import 'package:hsk_learner/legacy_data_model/word_item.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
 import 'package:hsk_learner/repositories/review_repository.dart';
@@ -21,7 +21,7 @@ class ReviewFlashcards extends StatefulWidget {
   final Function update;
   final String type;
   final int deckSize;
-  final List<ReviewRating> ratings;
+  final List<ReviewRatingModel> ratings;
   const ReviewFlashcards({
     super.key,
     required this.hskList,
@@ -94,15 +94,15 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
     return (int value) async {
       int stat = value == 0 || value == 1 ? 0 : 1;
       statRepo.insertStat(value: stat, id: id);
-      ReviewRating rating = widget.ratings.firstWhere(
+      ReviewRatingModel rating = widget.ratings.firstWhere(
         (element) => element.id == value,
       );
       late DateTime dateTime;
-      if (rating.start == rating.end) {
-        dateTime = DateTime.now().add(rating.start);
+      if (rating.durationStart == rating.durationEnd) {
+        dateTime = DateTime.now().add(rating.durationStart);
       } else {
         dateTime = DateTime.now().add(
-          getRandomDuration(rating.start, rating.end),
+          getRandomDuration(rating.durationStart, rating.durationEnd),
         );
       }
       final int time = dateTime.toUtc().millisecondsSinceEpoch ~/ 1000;
@@ -531,7 +531,7 @@ class _ShowNextCardButton extends StatelessWidget {
 
 class _AnswerButton extends StatelessWidget {
   final Function(int value) callback;
-  final List<ReviewRating> ratings;
+  final List<ReviewRatingModel> ratings;
   const _AnswerButton({required this.callback, required this.ratings});
   @override
   Widget build(BuildContext context) {
