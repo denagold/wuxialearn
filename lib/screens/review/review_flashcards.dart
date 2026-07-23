@@ -3,7 +3,8 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/models/review_rating.dart';
-import 'package:hsk_learner/legacy_data_model/word_item.dart';
+import 'package:hsk_learner/extensions/word_item_extensions.dart';
+import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
 import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/repositories/stat_repository.dart';
@@ -62,7 +63,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
   }
 
   Future<void> setShowHint() async {
-    List<WordItem> wordList = createWordList(await widget.hskList);
+    List<WordItemModel> wordList = (await widget.hskList).toWordItemModels();
     showShowHint = wordList[0].hanzi.length > 1;
   }
 
@@ -153,7 +154,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
                 AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
               ) {
                 if (snapshot.hasData) {
-                  List<WordItem> wordList = createWordList(snapshot.data!);
+                  List<WordItemModel> wordList = snapshot.data!.toWordItemModels();
                   return Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

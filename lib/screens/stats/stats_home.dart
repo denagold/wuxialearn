@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/legacy_data_model/word_item.dart';
+import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/repositories/stat_repository.dart';
 import 'package:hsk_learner/screens/stats/stats.dart';
 import 'package:hsk_learner/screens/stats/word_view.dart';
@@ -397,7 +397,6 @@ class _HorizontalHskList extends StatelessWidget {
   final String title;
   final bool showPlayButton;
   const _HorizontalHskList({
-    super.key,
     required this.hskList,
     required this.title,
     required this.showPlayButton,
@@ -405,7 +404,7 @@ class _HorizontalHskList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wordMap = WordItem.fromMap(LargeText.hskMap);
+    final wordMap = WordItemModel.fromMap(LargeText.hskMap);
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
@@ -509,7 +508,6 @@ class _HskListviewItem extends StatelessWidget {
   final Function(String) callback;
   final bool showPlayButton;
   const _HskListviewItem({
-    super.key,
     required this.hskList,
     required this.showTranslation,
     required this.separator,

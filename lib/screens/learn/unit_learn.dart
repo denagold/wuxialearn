@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/legacy_data_model/word_item.dart';
+import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
 import 'package:hsk_learner/repositories/learn_repository.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
@@ -19,7 +19,7 @@ class UnitLearn extends StatefulWidget {
     required this.updateUnits,
     required this.courseName,
   });
-  final List<WordItem> wordList;
+  final List<WordItemModel> wordList;
   final int unit;
   final int subunit;
   final bool lastSubunit;

@@ -1,9 +1,9 @@
 class WordItemModel {
-  late final int id;
-  late final String hanzi;
-  late final String pinyin;
-  late final String translation;
-  late final List<String> literal;
+  final int id;
+  final String hanzi;
+  final String pinyin;
+  final String translation;
+  final List<String> literal;
 
 
   WordItemModel({
@@ -54,6 +54,6 @@ class WordItemModel {
 
   @override
   String toString() {
-    return 'WordItemModel(id: $id; hanzi: $hanzi; $pinyin; $translation; literal: $literal.ToString())';
+    return 'WordItemModel(id: $id; hanzi: $hanzi; $pinyin; $translation; literal: $literal.toString())';
   }
 }

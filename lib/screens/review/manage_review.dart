@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/legacy_data_model/word_item.dart';
+import 'package:hsk_learner/extensions/word_item_extensions.dart';
+import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 import 'package:provider/provider.dart';
@@ -317,7 +318,7 @@ class _HskListview extends StatelessWidget {
         AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
       ) {
         if (snapshot.hasData) {
-          List<WordItem> wordList = createWordList(snapshot.data!);
+          List<WordItemModel> wordList = snapshot.data!.toWordItemModels();
           return Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0),
@@ -368,7 +369,7 @@ class _HskListview extends StatelessWidget {
 }
 
 class _HskListviewItem extends StatelessWidget {
-  final WordItem wordItem;
+  final WordItemModel wordItem;
   final bool showTranslation;
   final bool separator;
   final Function(int) callback;

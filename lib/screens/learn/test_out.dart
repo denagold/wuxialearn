@@ -1,7 +1,8 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/legacy_data_model/word_item.dart';
+import 'package:hsk_learner/extensions/word_item_extensions.dart';
+import 'package:hsk_learner/models/word_item.dart';
 import '../../sql/test_out_sql.dart';
 import '../games/multiple_choice_game.dart';
 import '../games/unit_game.dart';
@@ -36,7 +37,7 @@ class _TestOutState extends State<TestOut> {
           AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
         ) {
           if (snapshot.hasData) {
-            List<WordItem> wordList = createWordList(snapshot.data!);
+            List<WordItemModel> wordList = snapshot.data!.toWordItemModels();
             return _TestOutController(wordList: wordList, hsk: widget.hsk);
           } else {
             return const Center(child: CircularProgressIndicator());
@@ -48,10 +49,9 @@ class _TestOutState extends State<TestOut> {
 }
 
 class _TestOutController extends StatefulWidget {
-  final List<WordItem> wordList;
+  final List<WordItemModel> wordList;
   final int hsk;
   const _TestOutController({
-    super.key,
     required this.wordList,
     required this.hsk,
   });
@@ -72,7 +72,7 @@ class _TestOutControllerState extends State<_TestOutController> {
     super.dispose();
   }
 
-  void callback(bool value, WordItem currWord, bool? empty) async {
+  void callback(bool value, WordItemModel currWord, bool? empty) async {
     if (value == false) {
       numIncorrect++;
     }
@@ -120,7 +120,7 @@ class _TestOutControllerState extends State<_TestOutController> {
     }
   }
 
-  void createGamesListForGroup(List<WordItem> wordList) {
+  void createGamesListForGroup(List<WordItemModel> wordList) {
     for (int i = 0; i < wordList.length; i++) {
       if (i % 2 == 0) {
         gamesList.add(

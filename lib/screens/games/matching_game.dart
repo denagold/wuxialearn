@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:hsk_learner/legacy_data_model/word_item.dart';
+import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:hsk_learner/utils/large_text.dart';
@@ -11,8 +11,8 @@ import 'package:provider/provider.dart';
 import '../../utils/styles.dart';
 
 class MatchingGame extends StatefulWidget {
-  final List<WordItem> wordList;
-  final Function(bool value, WordItem currWord, bool? chineseToEnglish)
+  final List<WordItemModel> wordList;
+  final Function(bool value, WordItemModel currWord, bool? chineseToEnglish)
   callback;
 
   const MatchingGame({
@@ -207,7 +207,7 @@ class _MatchingGameState extends State<MatchingGame> {
                           audioService.playCorrectSound();
                           widget.callback(
                             true,
-                            WordItem.fromMap(LargeText.hskMap),
+                            WordItemModel.fromMap(LargeText.hskMap),
                             null,
                           );
                         },

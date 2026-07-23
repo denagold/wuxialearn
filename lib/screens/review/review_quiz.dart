@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/legacy_data_model/word_item.dart';
+import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/repositories/learn_repository.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:provider/provider.dart';
@@ -32,11 +32,11 @@ class _ReviewQuizState extends State<ReviewQuiz> {
       ) {
         if (snapshot.hasData) {
           List<Map<String, List<Map<String, dynamic>>>>? hskMap = snapshot.data;
-          List<WordItem> wordList = [];
+          List<WordItemModel> wordList = [];
           List<Map<String, dynamic>> sentenceList = [];
           if (hskMap != null) {
             for (var i = 0; i < hskMap.length; i++) {
-              wordList.add(WordItem.fromMap(hskMap[i]["hskList"]![0]));
+              wordList.add(WordItemModel.fromMap(hskMap[i]["hskList"]![0]));
               if (hskMap[i]["sentenceList"] != null) {
                 if (hskMap[i]["sentenceList"]!.isNotEmpty) {
                   sentenceList.add(hskMap[i]["sentenceList"]![0]);

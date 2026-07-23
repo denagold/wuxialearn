@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/legacy_data_model/word_item.dart';
+import 'package:hsk_learner/extensions/word_item_extensions.dart';
 import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/repositories/learn_repository.dart';
 import 'package:hsk_learner/repositories/review_repository.dart';
@@ -68,7 +68,7 @@ class _UnitViewState extends State<UnitView> {
               ) {
                 if (snapshot.hasData) {
                   List<Map<String, dynamic>> hskList = snapshot.data!;
-                  final wordList = createWordListWithSubunit(hskList);
+                  final wordList = hskList.toWordItemModelsWithSubunit();
                   int hskLength = hskList.length;
                   List<int> unitIndex = [0];
                   List<int> unitLength = [];

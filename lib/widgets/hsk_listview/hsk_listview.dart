@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/legacy_data_model/word_item.dart';
+import 'package:hsk_learner/extensions/word_item_extensions.dart';
+import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 import 'package:hsk_learner/utils/large_text.dart';
@@ -39,7 +40,7 @@ class HskListview extends StatelessWidget {
             AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
           ) {
             if (snapshot.hasData) {
-              final wordList = createWordList(snapshot.data!);
+              final wordList = snapshot.data!.toWordItemModels();
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -98,7 +99,7 @@ class HskListview extends StatelessWidget {
           },
         );
       case Axis.horizontal:
-        final wordMap = WordItem.fromMap(LargeText.hskMap);
+        final wordMap = WordItemModel.fromMap(LargeText.hskMap);
         return PrototypeHeight(
           backgroundColor: Colors.transparent,
           prototype: PrototypeHorizontalHskListView(
@@ -117,7 +118,7 @@ class HskListview extends StatelessWidget {
               AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
             ) {
               if (snapshot.hasData) {
-                final wordList = createWordList(snapshot.data!);
+                final wordList = snapshot.data!.toWordItemModels();
                 return Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 0.0,
@@ -188,7 +189,7 @@ class PrototypeHorizontalHskListView extends StatelessWidget {
   });
   final bool connectTop;
   final Color color;
-  final WordItem wordItem;
+  final WordItemModel wordItem;
   final bool showTranslation;
   final Function(String) playCallback;
   final bool showPlayButton;
@@ -226,7 +227,7 @@ class PrototypeHorizontalHskListView extends StatelessWidget {
 }
 
 class HskListviewItem extends StatelessWidget {
-  final WordItem wordItem;
+  final WordItemModel wordItem;
   final bool showTranslation;
   final bool separator;
   final Function(String) callback;

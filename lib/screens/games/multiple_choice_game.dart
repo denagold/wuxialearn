@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/legacy_data_model/word_item.dart';
+import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/repositories/course_preferences_repository.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:hsk_learner/services/audio_service.dart';
@@ -9,9 +9,9 @@ import 'package:provider/provider.dart';
 import '../../utils/styles.dart';
 
 class ChineseToEnglishGame extends StatefulWidget {
-  final WordItem currWord;
-  final List<WordItem> wordList;
-  final Function(bool value, WordItem currWord, bool? chineseToEnglish)
+  final WordItemModel currWord;
+  final List<WordItemModel> wordList;
+  final Function(bool value, WordItemModel currWord, bool? chineseToEnglish)
   callback;
   final int index;
   final bool? chineseToEnglish;
@@ -181,9 +181,9 @@ class _ChineseToEnglishGameState extends State<ChineseToEnglishGame> {
 }
 
 class AnswersList extends StatefulWidget {
-  final WordItem currWord;
-  final List<WordItem> wordList;
-  final Function(bool value, WordItem currWord, bool? chineseToEnglish)
+  final WordItemModel currWord;
+  final List<WordItemModel> wordList;
+  final Function(bool value, WordItemModel currWord, bool? chineseToEnglish)
   callback;
   final int index;
   final bool chineseToEnglish;
@@ -206,7 +206,7 @@ class AnswersList extends StatefulWidget {
 
 class _AnswersListState extends State<AnswersList> {
   late final coursePrefs = context.read<CoursePreferencesRepositoryBase>();
-  late List<WordItem> buttonSelectionWords;
+  late List<WordItemModel> buttonSelectionWords;
   bool clicked = false;
   @override
   void initState() {

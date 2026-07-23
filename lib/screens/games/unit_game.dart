@@ -7,13 +7,13 @@ import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/repositories/stat_repository.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:provider/provider.dart';
-import '../../legacy_data_model/word_item.dart';
+import '../../models/word_item.dart';
 import 'matching_game.dart';
 import 'multiple_choice_game.dart';
 import 'sentence_game.dart';
 
 class UnitGame extends StatefulWidget {
-  final List<WordItem> wordList;
+  final List<WordItemModel> wordList;
   final List<Map<String, dynamic>> sentenceList;
   final int unit;
   final int subunit;
@@ -71,7 +71,7 @@ class _UnitGameState extends State<UnitGame> {
     audioService.initTestPlay();
   }
 
-  void callback(bool value, WordItem currWord, bool? chineseToEnglish) async {
+  void callback(bool value, WordItemModel currWord, bool? chineseToEnglish) async {
     if (widget.unit > 0 && chineseToEnglish != null) {
       final int result = value ? 1 : 0;
       statRepo.insertStat(value: result, id: currWord.id);
@@ -138,7 +138,7 @@ class _UnitGameState extends State<UnitGame> {
   }
 
   void createGamesListForGroup(
-    List<WordItem> wordList,
+    List<WordItemModel> wordList,
     List<Map<String, dynamic>> sentenceList,
   ) {
     for (int i = 0; i < wordList.length; i++) {
