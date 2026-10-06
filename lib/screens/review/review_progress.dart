@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hsk_learner/models/review_progress.dart';
 import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
 import 'package:provider/provider.dart';
@@ -13,11 +14,10 @@ class ReviewProgress extends StatefulWidget {
 class _ReviewProgressState extends State<ReviewProgress> {
   List<String> deckNames = ["hsk", "wuxia", "any"];
   String deckName = "hsk";
-  late Future<List<Map<String, dynamic>>> progressFuture;
+  late Future<List<ReviewProgressData>> progressFuture;
   late final reviewRepo = context.read<ReviewRepositoryBase>();
   @override
   void initState() {
-    reviewRepo.test(deck: deckName);
     progressFuture = reviewRepo.getProgress(deck: deckName);
     super.initState();
   }
@@ -45,7 +45,7 @@ class _ReviewProgressState extends State<ReviewProgress> {
             future: progressFuture,
             builder: (
               BuildContext context,
-              AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
+              AsyncSnapshot<List<ReviewProgressData>> snapshot,
             ) {
               if (snapshot.hasData) {
                 final data = snapshot.data!;
@@ -59,11 +59,11 @@ class _ReviewProgressState extends State<ReviewProgress> {
                         child:
                             index % 2 == 0
                                 ? Text(
-                                  data[index ~/ 2]["rating_name"],
+                                  data[index ~/ 2].ratingName,
                                   style: const TextStyle(fontSize: 20),
                                 )
                                 : Text(
-                                  data[index ~/ 2]["count"].toString(),
+                                  data[index ~/ 2].count.toString(),
                                   style: const TextStyle(fontSize: 20),
                                 ),
                       ),

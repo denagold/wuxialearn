@@ -1,16 +1,14 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/models/review_rating.dart';
 import 'package:hsk_learner/extensions/word_item_extensions.dart';
+import 'package:hsk_learner/models/review_word.dart';
 import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
-import 'package:hsk_learner/repositories/review_repository.dart';
-import 'package:hsk_learner/repositories/stat_repository.dart';
 import 'package:hsk_learner/repositories/word_repository.dart';
 import 'package:hsk_learner/screens/stats/character_view.dart';
 import 'package:hsk_learner/services/audio_service.dart';
+import 'package:hsk_learner/services/review_word_rating_service.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/prototype.dart';
@@ -18,7 +16,7 @@ import 'flashcard.dart';
 
 class ReviewFlashcards extends StatefulWidget {
 
-  final Future<List<Map<String, dynamic>>> hskList;
+  final Future<List<ReviewWord>> hskList;
   final Function update;
   final String type;
   final int deckSize;
@@ -40,8 +38,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
   late final _audioService = context.read<AudioServiceBase>();
   late final appPrefs = context.read<AppPreferencesRepositoryBase>();
   late final wordRepo = context.read<WordRepositoryBase>();
-  late final statRepo = context.read<StatRepositoryBase>();
-  late final reviewRepo = context.read<ReviewRepositoryBase>();
+  late final wordRatingService = context.read<ReviewWordRatingServiceBase>();
 
   bool lastPage = false;
   bool wasClicked = false;
@@ -52,7 +49,7 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
   final PageController _pageController = PageController(initialPage: 0);
   int offset = 0;
 
-  late Future<List<Map<String, dynamic>>> reviewList;
+  late Future<List<ReviewWord>> reviewList;
 
   @override
   void initState() {
@@ -73,9 +70,9 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
     });
   }
 
-  Future<List<Map<String, dynamic>>> appendElements(
-    Future<List<Map<String, dynamic>>> listFuture,
-    Future<List<Map<String, dynamic>>> elementsToAdd,
+  Future<List<ReviewWord>> appendElements(
+    Future<List<ReviewWord>> listFuture,
+    Future<List<ReviewWord>> elementsToAdd,
   ) async {
     final list = await listFuture;
     final list2 = await elementsToAdd;
@@ -83,31 +80,16 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
     return list3;
   }
 
-  Duration getRandomDuration(Duration min, Duration max) {
-    int minMilliseconds = min.inMilliseconds;
-    int maxMilliseconds = max.inMilliseconds;
-    Random rnd = Random();
-    var range = (maxMilliseconds - minMilliseconds);
-    return Duration(milliseconds: minMilliseconds + rnd.nextInt(range));
-  }
-
   answerButtonCallBack(int id) {
     return (int value) async {
-      int stat = value == 0 || value == 1 ? 0 : 1;
-      statRepo.insertStat(value: stat, id: id);
       ReviewRatingModel rating = widget.ratings.firstWhere(
         (element) => element.id == value,
       );
-      late DateTime dateTime;
-      if (rating.durationStart == rating.durationEnd) {
-        dateTime = DateTime.now().add(rating.durationStart);
-      } else {
-        dateTime = DateTime.now().add(
-          getRandomDuration(rating.durationStart, rating.durationEnd),
-        );
-      }
-      final int time = dateTime.toUtc().millisecondsSinceEpoch ~/ 1000;
-      reviewRepo.updateReview(id: id, time: time, ratingId: rating.id);
+      await wordRatingService.rateWord(
+        wordId: id,
+        ratingId: value,
+        rating: rating,
+      );
       widget.update();
       /*
       still needs some thought on what we should do here
@@ -147,11 +129,11 @@ class _ReviewFlashcardsState extends State<ReviewFlashcards> {
       child: SafeArea(
         child: Column(
           children: [
-            FutureBuilder<List<Map<String, dynamic>>>(
+            FutureBuilder<List<ReviewWord>>(
               future: reviewList,
               builder: (
                 BuildContext context,
-                AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
+                AsyncSnapshot<List<ReviewWord>> snapshot,
               ) {
                 if (snapshot.hasData) {
                   List<WordItemModel> wordList = snapshot.data!.toWordItemModels();

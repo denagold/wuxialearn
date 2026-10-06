@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/constants/deck_type.dart';
 import 'package:hsk_learner/extensions/word_item_extensions.dart';
+import 'package:hsk_learner/models/review_statistics.dart';
 import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/repositories/review_repository.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
@@ -18,29 +20,29 @@ class ManageReview extends StatefulWidget {
 
 class _ManageReviewState extends State<ManageReview> {
   late final reviewRepo = context.read<ReviewRepositoryBase>();
-  late Future<List<Map<String, dynamic>>> statsListFuture;
+  late Future<List<ReviewStatistics>> statsListFuture;
   String sortValue = "Score";
   String orderValue = "Ascending";
   List<String> sortOptions = ["Score", "Last Seen", "Unit"];
   List<String> orderOption = ["Ascending", "Descending"];
-  List<String> deckNames = ["Any", "hsk", "wuxia"];
-  String deckName = 'hsk';
+  List<String> deckNames = DeckType.all.map((e) => e.toDbString()).toList();
+  String deckName = DeckType.hsk.toDbString();
   @override
   initState() {
     super.initState();
     refresh();
   }
 
-  Future<List<Map<String, dynamic>>> getManageReview({
+  Future<List<ReviewStatistics>> getManageReview({
     required String sortBy,
     required String orderBy,
-    required String deck,
+    required String deckName,
   }) async {
     final data = await reviewRepo.getManageReview(
       sortBy: sortBy,
       orderBy: orderBy,
       deckSize: -1,
-      deck: deck,
+      deckName: deckName,
     );
     return data;
   }
@@ -48,7 +50,6 @@ class _ManageReviewState extends State<ManageReview> {
   void refresh() {
     String orderSQL = "ASC";
     String sortSQl = "unit";
-    String deck = "where deck = '$deckName'";
     switch (orderValue) {
       case "Ascending":
         orderSQL = "ASC";
@@ -68,22 +69,17 @@ class _ManageReviewState extends State<ManageReview> {
         sortSQl = "last_seen";
         break;
     }
-    switch (deckName) {
-      case "Any":
-        deck = "where deck = 'any'";
-        break;
-    }
     setState(() {
       statsListFuture = getManageReview(
         sortBy: sortSQl,
         orderBy: orderSQL,
-        deck: deck,
+        deckName: deckName,
       );
     });
   }
 
   bool showRemove() {
-    return deckName != "Any";
+    return deckName != DeckType.any.toDbString();
   }
 
   Future<void> onClick(int id) async {
@@ -287,7 +283,7 @@ class _ManageReviewState extends State<ManageReview> {
 }
 
 class _HskListview extends StatelessWidget {
-  final Future<List<Map<String, dynamic>>> statsListFuture;
+  final Future<List<ReviewStatistics>> statsListFuture;
   final bool showTranslation;
   final bool connectTop;
   final Color color;
@@ -311,11 +307,11 @@ class _HskListview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
+    return FutureBuilder<List<ReviewStatistics>>(
       future: statsListFuture,
       builder: (
         BuildContext context,
-        AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
+        AsyncSnapshot<List<ReviewStatistics>> snapshot,
       ) {
         if (snapshot.hasData) {
           List<WordItemModel> wordList = snapshot.data!.toWordItemModels();

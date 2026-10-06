@@ -17,8 +17,8 @@ final class ReviewRatingModel {
     return {
       'rating_id': id,
       'rating_name': name,
-      'rating_start': durationStart.inSeconds,
-      'rating_end': durationEnd.inSeconds,
+      'rating_duration_start': durationStart.inSeconds,
+      'rating_duration_end': durationEnd.inSeconds,
     };
   }
   factory ReviewRatingModel.fromMap(Map<String, dynamic> map) => ReviewRatingModel(

@@ -1,21 +1,27 @@
+import 'package:hsk_learner/constants/deck_type.dart';
+import 'package:hsk_learner/models/review_progress.dart';
+import 'package:hsk_learner/models/review_rating.dart';
+import 'package:hsk_learner/models/review_statistics.dart';
+import 'package:hsk_learner/models/review_word.dart';
+import 'package:hsk_learner/repositories/review_rating_repository.dart';
 import 'package:hsk_learner/services/database_service.dart';
 
 abstract class ReviewRepositoryBase {
-  Future<List<Map<String, dynamic>>> getSrsReview({required int deckSize});
+  Future<List<ReviewWord>> getSrsReview({required int deckSize});
 
-  Future<List<Map<String, dynamic>>> getUncategorizedWords({
+  Future<List<ReviewWord>> getUncategorizedWords({
     required String deck,
     required int deckSize,
   });
 
-  Future<List<Map<String, dynamic>>> getReview({
+  Future<List<ReviewWord>> getReview({
     required int deckSize,
     required String sortBy,
     required String orderBy,
     required String deckName,
   });
 
-  Future<List<Map<String, dynamic>>> getProgress({required String deck});
+  Future<List<ReviewProgressData>> getProgress({required String deck});
 
   Future<void> updateReview({
     required int id,
@@ -25,11 +31,11 @@ abstract class ReviewRepositoryBase {
 
   Future<void> removeFromDeck({required int id, required String deck});
 
-  Future<List<Map<String, dynamic>>> getManageReview({
+  Future<List<ReviewStatistics>> getManageReview({
     required int deckSize,
     required String sortBy,
     required String orderBy,
-    required String deck,
+    required String deckName,
   });
 
   Future<void> addToReviewDeck({
@@ -38,8 +44,7 @@ abstract class ReviewRepositoryBase {
     required bool value,
   });
 
-  // Ratings
-  Future<List<Map<String, dynamic>>> getReviewRatings();
+  Future<List<ReviewRatingModel>> getReviewRatings();
 
   Future<void> setReviewRating({
     required int id,
@@ -55,23 +60,22 @@ abstract class ReviewRepositoryBase {
   });
 
   Future<void> deleteRating({required int id});
-
-  Future<List<Map<String, dynamic>>> test({required String deck});
 }
 
 class ReviewRepositoryImpl implements ReviewRepositoryBase {
   final DatabaseServiceBase dbService;
+  final ReviewRatingRepositoryBase ratingRepo;
 
-  ReviewRepositoryImpl(this.dbService);
+  ReviewRepositoryImpl(this.dbService, {required this.ratingRepo});
 
   @override
-  Future<List<Map<String, dynamic>>> getSrsReview({required int deckSize}) async {
+  Future<List<ReviewWord>> getSrsReview({required int deckSize}) async {
     final db = await dbService.database;
     String limit = "limit $deckSize";
     if (deckSize < 0) {
       limit = "";
     }
-    return db.rawQuery("""
+    final results = await db.rawQuery("""
         SELECT t1.id, t1.hanzi, t1.pinyin, translations0, subunit,
         a_tl.translation as char_one, b_tl.translation as char_two, c_tl.translation as char_three, d_tl.translation as char_four
             from(
@@ -91,10 +95,11 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
         ORDER BY show_next ASC
 		    $limit
       """);
+    return createReviewWordList(results);
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getUncategorizedWords({
+  Future<List<ReviewWord>> getUncategorizedWords({
     required String deck,
     required int deckSize,
   }) async {
@@ -103,7 +108,7 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
     if (deckSize < 0) {
       limit = "";
     }
-    return db.rawQuery("""
+    final results = await db.rawQuery("""
         SELECT t1.id, t1.hanzi, t1.pinyin, translations0, subunit,
         a_tl.translation as char_one, b_tl.translation as char_two, c_tl.translation as char_three, d_tl.translation as char_four
             from(
@@ -118,22 +123,23 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
         left join unihan c_tl on t1.c = c_tl.hanzi
         left join unihan d_tl on t1.d = d_tl.hanzi 
         join review on review.id = t1.id
-        WHERE deck = '$deck' AND rating_id IS NULL
+        where deck = ? and rating_id is null
         GROUP BY t1.id
         ORDER BY t1.id ASC
         $limit
-      """);
+      """, [deck]);
+    return createReviewWordList(results);
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getReview({
+  Future<List<ReviewWord>> getReview({
     required int deckSize,
     required String sortBy,
     required String orderBy,
     required String deckName,
   }) async {
     final db = await dbService.database;
-    return db.rawQuery("""
+    final results = await db.rawQuery("""
         SELECT t1.id, t1.score, t1.percent_correct, t1.hanzi,
         t1.translations0, t1.hsk, t1.pinyin,
         a_tl.translation as char_one, b_tl.translation as char_two, 
@@ -168,36 +174,38 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
     left join unihan c_tl on t1.c = c_tl.hanzi
     left join unihan d_tl on t1.d = d_tl.hanzi 
     join review on review.id = t1.id
-    where deck = '$deckName'
+    where deck = ?
     GROUP BY t1.id
     ORDER BY $sortBy $orderBy
     LIMIT $deckSize;
-    """);
+    """, [deckName]);
+    return createReviewWordList(results);
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getProgress({required String deck}) async {
+  Future<List<ReviewProgressData>> getProgress({required String deck}) async {
     final db = await dbService.database;
-    return db.rawQuery("""
+    final results = await db.rawQuery("""
         SELECT review_rating.rating_id, count(1) as count, rating_name, 1 as rs 
         from review_rating
         join review on review.rating_id = review_rating.rating_id
-        where deck = '$deck'
+        where deck = ?
         group by review_rating.rating_id
         union ALL select review_rating.rating_id, 0 as count, rating_name, 2 from review_rating
         where review_rating.rating_id not in (
-	              SELECT review_rating.rating_id from review_rating
+	          SELECT review_rating.rating_id from review_rating
                 join review on review.rating_id = review_rating.rating_id
-                where deck = '$deck'
+                where deck = ?
                 group by review_rating.rating_id
         )
         union all select -1, count(1), 'uncategorized', 3
-        from review where deck = '$deck' AND rating_id is null
+        from review where deck = ? AND rating_id is null
         union all select -2, count(1), 'total', 4
         from review
-        where deck = '$deck'
+        where deck = ?
         order by rs
-      """);
+      """, [deck, deck, deck, deck]);
+    return createReviewProgressDataList(results);
   }
 
   @override
@@ -208,8 +216,8 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
   }) async {
     final db = await dbService.database;
     await db.rawUpdate("""
-      UPDATE review set show_next = $time, rating_id = $ratingId where id = $id 
-    """);
+      UPDATE review set show_next = ? , rating_id = ? where id = ? 
+    """, [time, ratingId, id]);
   }
 
   @override
@@ -219,41 +227,68 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
   }) async {
     final db = await dbService.database;
     await db.rawDelete("""
-      delete from review where deck = '$deck' and id = $id
-    """);
+      delete from review where deck = ? and id = ?
+    """, [deck, id]);
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getManageReview({
+  Future<List<ReviewStatistics>> getManageReview({
     required int deckSize,
     required String sortBy,
     required String orderBy,
-    required String deck,
+    required String deckName,
   }) async {
     final db = await dbService.database;
-    return db.rawQuery("""
-    SELECT courses.id, right_occurrence, wrong_occurrence, 
-    courses.hanzi, courses.hsk, courses.pinyin, courses.translations0,
-    last_seen,
-    (right_occurrence - wrong_occurrence) as score,
-    ROUND(right_occurrence * 100.0 / (right_occurrence + wrong_occurrence), 1) AS percent_correct
-    FROM(
-      SELECT
-        wordid,
-        SUM(CASE stats.value WHEN 1 THEN 1 ELSE 0 END) right_occurrence,
-        SUM(CASE stats.value WHEN 0 THEN 1 ELSE 0 END) wrong_occurrence,
-        MAX(stats.date) last_seen
-      FROM stats
-      WHERE date > 0
-      GROUP BY 
-        wordid
-    )
-    INNER JOIN courses on courses.id = wordid
-    join review on review.id = wordid
-    $deck
-    ORDER BY $sortBy $orderBy
-    LIMIT $deckSize;
-    """);
+    final safeSortBy = _sanitizeOrderColumn(sortBy);
+    final safeOrderBy = _sanitizeOrderDirection(orderBy);
+    String deckFilter;
+    List<dynamic> queryArgs;
+    if (deckName.toLowerCase() == DeckType.any.toDbString()) {
+      deckFilter = '';
+      queryArgs = [];
+    } else {
+      deckFilter = 'AND review.deck = ?';
+      queryArgs = [deckName];
+    }
+    final hasLimit = deckSize > 0;
+    if (hasLimit) {
+      queryArgs.add(deckSize);
+    }
+    final results = await db.rawQuery("""
+      SELECT courses.id, right_occurrence, wrong_occurrence,
+      courses.hanzi, courses.hsk, courses.pinyin, courses.translations0,
+      last_seen,
+      (right_occurrence - wrong_occurrence) AS score,
+      ROUND(right_occurrence * 100.0 / (right_occurrence + wrong_occurrence), 1) AS percent_correct
+      FROM (
+        SELECT
+          wordid,
+          SUM(CASE value WHEN 1 THEN 1 ELSE 0 END) AS right_occurrence,
+          SUM(CASE value WHEN 0 THEN 1 ELSE 0 END) AS wrong_occurrence,
+          MAX(date) AS last_seen
+        FROM stats
+        WHERE date > 0
+        GROUP BY wordid
+      )
+      INNER JOIN courses ON courses.id = wordid
+      INNER JOIN review ON review.id = wordid
+      WHERE 1=1 $deckFilter
+      GROUP BY courses.id
+      ORDER BY $safeSortBy $safeOrderBy
+      ${hasLimit ? 'LIMIT ?' : ''};
+    """, queryArgs);
+    return createReviewStatisticsList(results);
+  }
+
+  String _sanitizeOrderColumn(String column) {
+    final sanitized = column.replaceAll(RegExp(r'[^a-zA-Z0-9_,.\s]'), '');
+    return sanitized;
+  }
+
+  String _sanitizeOrderDirection(String direction) {
+    final upper = direction.toUpperCase();
+    if (upper == 'DESC') return 'DESC';
+    return 'ASC';
   }
 
   @override
@@ -266,36 +301,33 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
     await db.transaction((txn) async {
       int timeStamp = DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
       final existingDeck = await txn.rawQuery(
-        "SELECT * FROM review WHERE id = $id AND deck = '$deck'",
+        "SELECT * FROM review WHERE id = ? AND deck = ?",
+        [id, deck],
       );
 
       if (existingDeck.isEmpty) {
         await txn.rawInsert("""
           INSERT INTO review(id, deck, show_next) 
-          VALUES($id, '$deck', $timeStamp)
-        """);
+          VALUES(?, ?, ?)
+        """, [id, deck, timeStamp]);
       }
 
       final existingAny = await txn.rawQuery(
-        "SELECT * FROM review WHERE id = $id AND deck = 'any'",
+        "SELECT * FROM review WHERE id = ? AND deck = 'any'",
+        [id],
       );
       if (existingAny.isEmpty) {
         await txn.rawInsert("""
           INSERT INTO review(id, deck, show_next) 
-          VALUES($id, 'any', $timeStamp)
-        """);
+          VALUES(?, 'any', ?)
+        """, [id, timeStamp]);
       }
     });
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getReviewRatings() async {
-    final db = await dbService.database;
-    return db.rawQuery("""
-        SELECT rating_id, rating_name, rating_duration_start, rating_duration_end
-        from review_rating
-        order by rating_duration_start asc
-      """);
+  Future<List<ReviewRatingModel>> getReviewRatings() async {
+    return ratingRepo.getAllReviewRatings();
   }
 
   @override
@@ -305,12 +337,14 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
     required int start,
     required int end,
   }) async {
-    final db = await dbService.database;
-    await db.rawUpdate("""
-      update review_rating set rating_name = '$name', 
-      rating_duration_start = $start, rating_duration_end = $end
-      where rating_id = $id
-    """);
+    await ratingRepo.updateReviewRating(
+      ReviewRatingModel(
+        id: id,
+        name: name,
+        durationStart: Duration(seconds: start),
+        durationEnd: Duration(seconds: end),
+      ),
+    );
   }
 
   @override
@@ -319,29 +353,30 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
     required int start,
     required int end,
   }) async {
-    final db = await dbService.database;
-    await db.rawInsert("""
-      insert into review_rating (rating_name, rating_duration_start, rating_duration_end)
-      values ('$name', $start, $end)
-    """);
+    await ratingRepo.addReviewRating(ReviewRatingModel(
+      // ignored by addReviewRating; the database assigns the rating_id
+      id: 0,
+      name: name,
+      durationStart: Duration(seconds: start),
+      durationEnd: Duration(seconds: end),
+    ));
   }
 
   @override
   Future<void> deleteRating({required int id}) async {
     final db = await dbService.database;
-    await db.rawDelete("""
-    delete from review_rating where rating_id = $id
-    """);
-    await db.rawUpdate("""
-    update review set rating_id = null where rating_id = $id
-    """);
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> test({required String deck}) async {
-    final db = await dbService.database;
-    return db.rawQuery("""
-        SELECT rating_id from review  where rating_id = ''
-      """);
+    await db.transaction((txn) async {
+      await txn.delete(
+        'review_rating',
+        where: 'rating_id = ?',
+        whereArgs: [id],
+      );
+      await txn.update(
+        'review',
+        {'rating_id': null},
+        where: 'rating_id = ?',
+        whereArgs: [id],
+      );
+    });
   }
 }

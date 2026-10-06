@@ -15,7 +15,7 @@ class ManageRatings extends StatefulWidget {
 
 class _ManageRatingsState extends State<ManageRatings> {
   late final reviewRepo = context.read<ReviewRepositoryBase>();
-  late Future<List<Map<String, dynamic>>> ratingsFuture;
+  late Future<List<ReviewRatingModel>> ratingsFuture;
 
   @override
   void initState() {
@@ -35,10 +35,10 @@ class _ManageRatingsState extends State<ManageRatings> {
       future: ratingsFuture,
       builder: (
         BuildContext context,
-        AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
+        AsyncSnapshot<List<ReviewRatingModel>> snapshot,
       ) {
         if (snapshot.hasData) {
-          final ratings = createReviewRatingModel(snapshot.data!);
+          final ratings = snapshot.data!;
           return Column(
             children: [
               const SizedBox(height: 5),

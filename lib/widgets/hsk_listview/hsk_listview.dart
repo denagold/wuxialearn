@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hsk_learner/extensions/word_item_extensions.dart';
 import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:hsk_learner/widgets/delayed_progress_indicator.dart';
@@ -8,7 +7,7 @@ import 'package:hsk_learner/utils/prototype.dart';
 import 'package:provider/provider.dart';
 
 class HskListview extends StatelessWidget {
-  final Future<List<Map<String, dynamic>>> hskList;
+  final Future<List<WordItemModel>> hskList;
   final bool showTranslation;
   final bool connectTop;
   final Color color;
@@ -33,14 +32,14 @@ class HskListview extends StatelessWidget {
     final audioService = context.read<AudioServiceBase>();
     switch (scrollAxis) {
       case Axis.vertical:
-        return FutureBuilder<List<Map<String, dynamic>>>(
+        return FutureBuilder<List<WordItemModel>>(
           future: hskList,
           builder: (
             BuildContext context,
-            AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
+            AsyncSnapshot<List<WordItemModel>> snapshot,
           ) {
             if (snapshot.hasData) {
-              final wordList = snapshot.data!.toWordItemModels();
+              final wordList = snapshot.data!;
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -111,14 +110,14 @@ class HskListview extends StatelessWidget {
             showPlayButton: showPlayButton,
             showPinyin: showPinyin,
           ),
-          child: FutureBuilder<List<Map<String, dynamic>>>(
+          child: FutureBuilder<List<WordItemModel>>(
             future: hskList,
             builder: (
               BuildContext context,
-              AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
+              AsyncSnapshot<List<WordItemModel>> snapshot,
             ) {
               if (snapshot.hasData) {
-                final wordList = snapshot.data!.toWordItemModels();
+                final wordList = snapshot.data!;
                 return Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 0.0,

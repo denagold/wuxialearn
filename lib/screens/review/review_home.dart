@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/extensions/word_item_extensions.dart';
 import 'package:hsk_learner/models/review_rating.dart';
+import 'package:hsk_learner/models/review_word.dart';
 import 'package:hsk_learner/repositories/app_preferences_repository.dart';
 import 'package:hsk_learner/repositories/review_preferences_repository.dart';
 import 'package:hsk_learner/repositories/review_repository.dart';
@@ -90,9 +92,9 @@ class _ReviewPageState extends State<ReviewPage> {
   late final appPrefs = context.read<AppPreferencesRepositoryBase>();
   late final reviewRepo = context.read<ReviewRepositoryBase>();
 
-  late Future<List<Map<String, dynamic>>> hskList;
+  late Future<List<ReviewWord>> hskList;
   late List<Future<List<Map<String, dynamic>>>> sentenceList;
-  late Future<List<Map<String, dynamic>>> reviewRatingFuture;
+  late Future<List<ReviewRatingModel>> reviewRatingFuture;
   bool lastPage = false;
   int numCards = -1;
   bool previewDeck = false;
@@ -147,7 +149,7 @@ class _ReviewPageState extends State<ReviewPage> {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getReview() async {
+  Future<List<ReviewWord>> getReview() async {
     switch (deckSizeValue) {
       case "Small":
         numCards = 10;
@@ -162,7 +164,7 @@ class _ReviewPageState extends State<ReviewPage> {
         numCards = -1;
         break;
     }
-    List<Map<String, dynamic>> reviewList = [];
+    List<ReviewWord> reviewList = [];
     switch (reviewWordsValue) {
       case "SRS":
         reviewList = await reviewRepo.getSrsReview(deckSize: numCards);
@@ -311,7 +313,7 @@ class _ReviewPageState extends State<ReviewPage> {
                   future: hskList,
                   builder: (
                     BuildContext context,
-                    AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
+                    AsyncSnapshot<List<ReviewWord>> snapshot,
                   ) {
                     if (snapshot.hasData) {
                       if (snapshot.data!.isNotEmpty) {
@@ -354,7 +356,7 @@ class _ReviewPageState extends State<ReviewPage> {
                 : const SizedBox(height: 0),
             deckExists
                 ? HskListview(
-                  hskList: hskList,
+                  hskList: hskList.then((list) => list.toWordItemModels()),
                   showTranslation: previewDeck,
                   showPinyin: showPinyin,
                   connectTop: true,
@@ -373,12 +375,10 @@ class _ReviewPageState extends State<ReviewPage> {
                     future: reviewRatingFuture,
                     builder: (
                       BuildContext context,
-                      AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
+                      AsyncSnapshot<List<ReviewRatingModel>> snapshot,
                     ) {
                       if (snapshot.hasData) {
-                        List<ReviewRatingModel> ratings = createReviewRatingModel(
-                          snapshot.data!,
-                        );
+                        List<ReviewRatingModel> ratings = snapshot.data!;
                         return TextButton(
                           style: Styles.blankButton4,
                           onPressed: () {

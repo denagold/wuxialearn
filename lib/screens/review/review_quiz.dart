@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/models/review_word.dart';
 import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/repositories/learn_repository.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:provider/provider.dart';
 
 class ReviewQuiz extends StatefulWidget {
-  final Future<List<Map<String, dynamic>>> hskList;
+  final Future<List<ReviewWord>> hskList;
   const ReviewQuiz({super.key, required this.hskList});
 
   @override
@@ -15,7 +16,7 @@ class ReviewQuiz extends StatefulWidget {
 class _ReviewQuizState extends State<ReviewQuiz> {
   late final learnRepo = context.read<LearnRepositoryBase>();
 
-  late Future<List<Map<String, List<Map<String, dynamic>>>>> hskMap;
+  late Future<List<Map<String, dynamic>>> hskMap;
   @override
   void initState() {
     hskMap = getSentenceList();
@@ -24,14 +25,14 @@ class _ReviewQuizState extends State<ReviewQuiz> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, List<Map<String, dynamic>>>>>(
+    return FutureBuilder<List<Map<String, dynamic>>>(
       future: hskMap,
       builder: (
         BuildContext context,
-        AsyncSnapshot<List<Map<String, List<Map<String, dynamic>>>>> snapshot,
+        AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
       ) {
         if (snapshot.hasData) {
-          List<Map<String, List<Map<String, dynamic>>>>? hskMap = snapshot.data;
+          List<Map<String, dynamic>>? hskMap = snapshot.data;
           List<WordItemModel> wordList = [];
           List<Map<String, dynamic>> sentenceList = [];
           if (hskMap != null) {
@@ -63,20 +64,18 @@ class _ReviewQuizState extends State<ReviewQuiz> {
     );
   }
 
-  Future<List<Map<String, List<Map<String, dynamic>>>>>
+  Future<List<Map<String, dynamic>>>
   getSentenceList() async {
-    List<Map<String, dynamic>> completedHskList = await widget.hskList;
-    Future<Map<String, List<Map<String, dynamic>>>> getUnits(int index) async {
-      final data = await learnRepo.getExamples(completedHskList[index]["hanzi"]);
-      Map<String, List<Map<String, dynamic>>> hskMap = {
-        "hskList": [completedHskList[index]],
+    List<ReviewWord> completedHskList = await widget.hskList;
+    List<Map<String, dynamic>> result = [];
+    for (var i = 0; i < completedHskList.length; i++) {
+      final data = await learnRepo.getExamples(completedHskList[i].hanzi);
+      Map<String, dynamic> hskMap = {
+        "hskList": [completedHskList[i].toMap()],
         "sentenceList": data,
       };
-      return hskMap;
+      result.add(hskMap);
     }
-
-    List<Future<Map<String, List<Map<String, dynamic>>>>> hskMap =
-        List.generate(completedHskList.length, (i) => getUnits(i));
-    return await Future.wait(hskMap);
+    return result;
   }
 }

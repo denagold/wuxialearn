@@ -1,3 +1,5 @@
+import 'package:hsk_learner/models/review_statistics.dart';
+import 'package:hsk_learner/models/review_word.dart';
 import 'package:hsk_learner/models/word_item.dart';
 
 class WordItemModelWithSubunit extends WordItemModel {
@@ -38,5 +40,29 @@ extension WordItemListConverter on List<Map<String, dynamic>> {
 
   List<WordItemModelWithSubunit> toWordItemModelsWithSubunit() {
     return map((word) => WordItemModelWithSubunit(word)).toList();
+  }
+}
+
+extension ReviewWordListConverter on List<ReviewWord> {
+  List<WordItemModel> toWordItemModels() {
+    return map((word) => WordItemModel(
+      id: word.id,
+      hanzi: word.hanzi,
+      pinyin: word.pinyin,
+      translation: word.translation,
+      literal: word.literal,
+    )).toList();
+  }
+}
+
+extension ReviewStatisticsListConverter on List<ReviewStatistics> {
+  List<WordItemModel> toWordItemModels() {
+    return map((stats) => WordItemModel(
+      id: stats.id,
+      hanzi: stats.hanzi,
+      pinyin: stats.pinyin ?? '',
+      translation: stats.translations0 ?? '',
+      literal: [],
+    )).toList();
   }
 }
