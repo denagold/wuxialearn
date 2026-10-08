@@ -1,4 +1,6 @@
+import 'package:hsk_learner/constants/deck_size.dart';
 import 'package:hsk_learner/constants/deck_type.dart';
+import 'package:hsk_learner/constants/review_word_type.dart';
 import 'package:hsk_learner/models/review_progress.dart';
 import 'package:hsk_learner/models/review_rating.dart';
 import 'package:hsk_learner/models/review_statistics.dart';
@@ -7,6 +9,12 @@ import 'package:hsk_learner/repositories/review_rating_repository.dart';
 import 'package:hsk_learner/services/database_service.dart';
 
 abstract class ReviewRepositoryBase {
+  Future<List<ReviewWord>> getReviewWords({
+    required String deckName,
+    required DeckSize deckSize,
+    required ReviewWordType type,
+  });
+
   Future<List<ReviewWord>> getSrsReview({required int deckSize});
 
   Future<List<ReviewWord>> getUncategorizedWords({
@@ -67,6 +75,45 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
   final ReviewRatingRepositoryBase ratingRepo;
 
   ReviewRepositoryImpl(this.dbService, {required this.ratingRepo});
+
+  @override
+  Future<List<ReviewWord>> getReviewWords({
+    required String deckName,
+    required DeckSize deckSize,
+    required ReviewWordType type,
+  }) {
+    switch (type) {
+      case ReviewWordType.srs:
+        /// The SRS type ignores [deckName], since due words are global.
+        return getSrsReview(deckSize: deckSize.cardCount);
+      case ReviewWordType.random:
+        return getReview(
+          deckSize: deckSize.cardCount,
+          sortBy: "RANDOM()",
+          orderBy: "ASC",
+          deckName: deckName,
+        );
+      case ReviewWordType.difficult:
+        return getReview(
+          deckSize: deckSize.cardCount,
+          sortBy: "score",
+          orderBy: "ASC",
+          deckName: deckName,
+        );
+      case ReviewWordType.old:
+        return getReview(
+          deckSize: deckSize.cardCount,
+          sortBy: "last_seen",
+          orderBy: "ASC",
+          deckName: deckName,
+        );
+      case ReviewWordType.uncategorized:
+        return getUncategorizedWords(
+          deck: deckName,
+          deckSize: deckSize.cardCount,
+        );
+    }
+  }
 
   @override
   Future<List<ReviewWord>> getSrsReview({required int deckSize}) async {

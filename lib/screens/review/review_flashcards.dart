@@ -18,15 +18,11 @@ class ReviewFlashcards extends StatefulWidget {
 
   final Future<List<ReviewWord>> hskList;
   final Function update;
-  final String type;
-  final int deckSize;
   final List<ReviewRatingModel> ratings;
   const ReviewFlashcards({
     super.key,
     required this.hskList,
     required this.update,
-    required this.type,
-    required this.deckSize,
     required this.ratings,
   });
 

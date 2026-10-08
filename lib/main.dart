@@ -13,6 +13,8 @@ import 'package:hsk_learner/repositories/word_repository.dart';
 import 'package:hsk_learner/services/audio_service.dart';
 import 'package:hsk_learner/services/database_service.dart';
 import 'package:hsk_learner/services/preferences_service.dart';
+import 'package:hsk_learner/services/review_word_rating_service.dart';
+import 'package:hsk_learner/services/srs_service.dart';
 import 'package:hsk_learner/services/theme_service.dart';
 import 'package:hsk_learner/utils/platform_info.dart';
 import 'package:logging/logging.dart';
@@ -64,10 +66,23 @@ Future<void> main() async {
         Provider<LearnRepositoryBase>(create: (context) => LearnRepositoryImpl(context.read())),
         Provider<WordRepositoryBase>(create: (context) => WordRepositoryImpl(context.read())),
         Provider<StatRepositoryBase>(create: (context) => StatRepositoryImpl(context.read())),
-        Provider<ReviewRepositoryBase>(create: (context) => ReviewRepositoryImpl(context.read())),
-
-        // Review related
         Provider<ReviewRatingRepositoryBase>(create: (context) => ReviewRatingRepositoryImpl(context.read())),
+        Provider<ReviewRepositoryBase>(
+          create: (context) => ReviewRepositoryImpl(
+            context.read(),
+            ratingRepo: context.read<ReviewRatingRepositoryBase>(),
+          ),
+        ),
+
+        // SRS repo and service
+        Provider<SRSServiceBase>(create: (context) => SRSService()),
+        Provider<ReviewWordRatingServiceBase>(
+          create: (context) => ReviewWordRatingServiceImpl(
+            statRepo: context.read(),
+            reviewRepo: context.read(),
+            srsService: context.read(),
+          ),
+        ),
 
       ],
       child: const MyApp(fdroid: true),

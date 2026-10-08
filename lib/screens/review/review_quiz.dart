@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/extensions/word_item_extensions.dart';
 import 'package:hsk_learner/models/review_word.dart';
-import 'package:hsk_learner/models/word_item.dart';
 import 'package:hsk_learner/repositories/learn_repository.dart';
 import 'package:hsk_learner/screens/games/unit_game.dart';
 import 'package:provider/provider.dart';
@@ -13,69 +13,64 @@ class ReviewQuiz extends StatefulWidget {
   State<ReviewQuiz> createState() => _ReviewQuizState();
 }
 
+/// A review word paired with its example sentences.
+class _QuizEntry {
+  final ReviewWord word;
+  final List<Map<String, dynamic>> sentences;
+  const _QuizEntry(this.word, this.sentences);
+}
+
 class _ReviewQuizState extends State<ReviewQuiz> {
   late final learnRepo = context.read<LearnRepositoryBase>();
 
-  late Future<List<Map<String, dynamic>>> hskMap;
+  late Future<List<_QuizEntry>> quizEntries;
   @override
   void initState() {
-    hskMap = getSentenceList();
+    quizEntries = getQuizEntries();
     super.initState();
+  }
+
+  Future<List<_QuizEntry>> getQuizEntries() async {
+    final reviewWords = await widget.hskList;
+    final entries = <_QuizEntry>[];
+    for (final word in reviewWords) {
+      entries.add(_QuizEntry(word, await learnRepo.getExamples(word.hanzi)));
+    }
+    return entries;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: hskMap,
+    return FutureBuilder<List<_QuizEntry>>(
+      future: quizEntries,
       builder: (
         BuildContext context,
-        AsyncSnapshot<List<Map<String, dynamic>>> snapshot,
+        AsyncSnapshot<List<_QuizEntry>> snapshot,
       ) {
         if (snapshot.hasData) {
-          List<Map<String, dynamic>>? hskMap = snapshot.data;
-          List<WordItemModel> wordList = [];
-          List<Map<String, dynamic>> sentenceList = [];
-          if (hskMap != null) {
-            for (var i = 0; i < hskMap.length; i++) {
-              wordList.add(WordItemModel.fromMap(hskMap[i]["hskList"]![0]));
-              if (hskMap[i]["sentenceList"] != null) {
-                if (hskMap[i]["sentenceList"]!.isNotEmpty) {
-                  sentenceList.add(hskMap[i]["sentenceList"]![0]);
-                }
-              }
-            }
-            return UnitGame(
-              courseName: "",
-              wordList: wordList,
-              sentenceList: sentenceList,
-              unit: 0,
-              subunit: 0,
-              lastSubunit: false,
-              name: "review",
-              updateUnits: () {},
-            );
-          } else {
-            return Container();
-          }
+          final entries = snapshot.data!;
+          final wordList = entries
+              .map((entry) => entry.word)
+              .toList()
+              .toWordItemModels();
+          final sentenceList = entries
+              .where((entry) => entry.sentences.isNotEmpty)
+              .map((entry) => entry.sentences[0])
+              .toList();
+          return UnitGame(
+            courseName: "",
+            wordList: wordList,
+            sentenceList: sentenceList,
+            unit: 0,
+            subunit: 0,
+            lastSubunit: false,
+            name: "review",
+            updateUnits: () {},
+          );
         } else {
           return const Center(child: CircularProgressIndicator());
         }
       },
     );
-  }
-
-  Future<List<Map<String, dynamic>>>
-  getSentenceList() async {
-    List<ReviewWord> completedHskList = await widget.hskList;
-    List<Map<String, dynamic>> result = [];
-    for (var i = 0; i < completedHskList.length; i++) {
-      final data = await learnRepo.getExamples(completedHskList[i].hanzi);
-      Map<String, dynamic> hskMap = {
-        "hskList": [completedHskList[i].toMap()],
-        "sentenceList": data,
-      };
-      result.add(hskMap);
-    }
-    return result;
   }
 }

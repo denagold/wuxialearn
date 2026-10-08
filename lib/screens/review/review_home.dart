@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hsk_learner/constants/deck_size.dart';
+import 'package:hsk_learner/constants/review_word_type.dart';
 import 'package:hsk_learner/extensions/word_item_extensions.dart';
 import 'package:hsk_learner/models/review_rating.dart';
 import 'package:hsk_learner/models/review_word.dart';
@@ -93,28 +95,18 @@ class _ReviewPageState extends State<ReviewPage> {
   late final reviewRepo = context.read<ReviewRepositoryBase>();
 
   late Future<List<ReviewWord>> hskList;
-  late List<Future<List<Map<String, dynamic>>>> sentenceList;
   late Future<List<ReviewRatingModel>> reviewRatingFuture;
   bool lastPage = false;
-  int numCards = -1;
   bool previewDeck = false;
   bool showPinyin = false;
   bool isCollapsed = true;
   bool deckExists = true;
-  List<String> reviewWordsOptions = [
-    "SRS",
-    "random words",
-    "difficult words",
-    "old words",
-    "uncategorized",
-  ];
   List<String> reviewTypeOptions = [flashCardType, quizType];
-  List<String> deckSizeOptions = ["Small", "Medium", "Large", "All"];
   List<String> deckNames = ["hsk", "wuxia"];
   String deckName = 'hsk';
   String reviewTypeValue = flashCardType;
-  String reviewWordsValue = "SRS";
-  String deckSizeValue = "Small";
+  ReviewWordType reviewWords = ReviewWordType.srs;
+  DeckSize deckSize = DeckSize.small;
   final PageController _pageController = PageController(initialPage: 0);
   @override
   void dispose() {
@@ -135,14 +127,14 @@ class _ReviewPageState extends State<ReviewPage> {
   void _loadReviewType() {
     setState(() {
       reviewTypeValue = reviewPrefs.reviewType ?? flashCardType;
-      reviewWordsValue = reviewPrefs.reviewWords ?? 'SRS';
-      deckSizeValue = reviewPrefs.deckSize ?? 'Small';
+      reviewWords = ReviewWordType.fromString(reviewPrefs.reviewWords);
+      deckSize = DeckSize.fromString(reviewPrefs.deckSize);
       deckName = reviewPrefs.deckName ?? 'hsk';
     });
   }
 
   void update() {
-    if (reviewWordsValue == "SRS") {
+    if (reviewWords == ReviewWordType.srs) {
       setState(() {
         hskList = getReview();
       });
@@ -150,57 +142,11 @@ class _ReviewPageState extends State<ReviewPage> {
   }
 
   Future<List<ReviewWord>> getReview() async {
-    switch (deckSizeValue) {
-      case "Small":
-        numCards = 10;
-        break;
-      case "Medium":
-        numCards = 20;
-        break;
-      case "Large":
-        numCards = 35;
-        break;
-      case "All":
-        numCards = -1;
-        break;
-    }
-    List<ReviewWord> reviewList = [];
-    switch (reviewWordsValue) {
-      case "SRS":
-        reviewList = await reviewRepo.getSrsReview(deckSize: numCards);
-        break;
-      case "random words":
-        reviewList = await reviewRepo.getReview(
-          deckSize: numCards,
-          sortBy: "RANDOM()",
-          orderBy: "ASC",
-          deckName: deckName,
-        );
-        break;
-      case "difficult words":
-        reviewList = await reviewRepo.getReview(
-          deckSize: numCards,
-          sortBy: "score",
-          orderBy: "ASC",
-          deckName: deckName,
-        );
-        break;
-      case "old words":
-        reviewList = await reviewRepo.getReview(
-          deckSize: numCards,
-          sortBy: "last_seen",
-          orderBy: "ASC",
-          deckName: deckName,
-        );
-        break;
-      case "uncategorized": // Handle new option
-        reviewList = await reviewRepo.getUncategorizedWords(
-          deck: deckName,
-          deckSize: numCards,
-        );
-        break;
-    }
-    return reviewList;
+    return reviewRepo.getReviewWords(
+      deckName: deckName,
+      deckSize: deckSize,
+      type: reviewWords,
+    );
   }
 
   @override
@@ -251,7 +197,7 @@ class _ReviewPageState extends State<ReviewPage> {
                               onPressed: () {
                                 _showReviewWordsActionSheet(context);
                               },
-                              child: Text(reviewWordsValue),
+                              child: Text(reviewWords.label),
                             ),
                           ],
                         ),
@@ -275,9 +221,8 @@ class _ReviewPageState extends State<ReviewPage> {
                               onPressed: () {
                                 _showReviewSizeActionSheet(context);
                               },
-                              child: Text(deckSizeValue),
+                              child: Text(deckSize.label),
                             ),
-                            //DropDown(dropdownOptions: deckSizeOptions, callback: (value) { deckSizeValue = value; })
                           ],
                         ),
                         Row(
@@ -398,8 +343,6 @@ class _ReviewPageState extends State<ReviewPage> {
                                       (context) => ReviewFlashcards(
                                         hskList: hskList,
                                         update: update,
-                                        type: reviewWordsValue,
-                                        deckSize: numCards,
                                         ratings: ratings,
                                       ),
                                 ),
@@ -429,18 +372,19 @@ class _ReviewPageState extends State<ReviewPage> {
           (BuildContext context) => CupertinoActionSheet(
             title: const Text('Select word selection type'),
             actions: List<CupertinoActionSheetAction>.generate(
-              reviewWordsOptions.length,
+              ReviewWordType.all.length,
               (index) {
+                final type = ReviewWordType.all[index];
                 return CupertinoActionSheetAction(
                   isDefaultAction: true,
                   onPressed: () {
                     Navigator.pop(context, true);
                     setState(() {
-                      reviewWordsValue = reviewWordsOptions[index];
+                      reviewWords = type;
                     });
-                    reviewPrefs.reviewWords = reviewWordsValue;
+                    reviewPrefs.reviewWords = type.label;
                   },
-                  child: Text(reviewWordsOptions[index]),
+                  child: Text(type.label),
                 );
               },
             ),
@@ -481,18 +425,19 @@ class _ReviewPageState extends State<ReviewPage> {
           (BuildContext context) => CupertinoActionSheet(
             title: const Text('Select a deck size'),
             actions: List<CupertinoActionSheetAction>.generate(
-              deckSizeOptions.length,
+              DeckSize.allSizes.length,
               (index) {
+                final size = DeckSize.allSizes[index];
                 return CupertinoActionSheetAction(
                   isDefaultAction: true,
                   onPressed: () {
                     Navigator.pop(context, true);
                     setState(() {
-                      deckSizeValue = deckSizeOptions[index];
+                      deckSize = size;
                     });
-                    reviewPrefs.deckSize = deckSizeValue;
+                    reviewPrefs.deckSize = size.label;
                   },
-                  child: Text(deckSizeOptions[index]),
+                  child: Text(size.label),
                 );
               },
             ),
