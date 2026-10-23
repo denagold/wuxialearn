@@ -105,10 +105,11 @@ class _TestOutControllerState extends State<_TestOutController> {
     }
   }
 
-  void updatePage() {
+  Future<void> updatePage() async {
     bool lastPage = gameIndex + 1 == gamesList.length;
     if (lastPage) {
-      TestOutSql.completeHSKLevel(widget.hsk);
+      await TestOutSql.completeHSKLevel(widget.hsk);
+      if (!mounted) return;
       Navigator.pop(context);
     } else {
       _pageController.animateToPage(

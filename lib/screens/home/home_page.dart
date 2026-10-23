@@ -110,6 +110,8 @@ class MyHomePageState extends State<MyHomePage> {
           ],
         ),
         tabBuilder: (BuildContext context, int index) {
+          // TODO: Seems like tabs are destroyed during selection.
+          //  return tabList[index];
           return tabList[tabsIndex];
         },
       ),
