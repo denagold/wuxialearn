@@ -132,24 +132,31 @@ class PreferencesService implements PreferencesServiceBase {
     for (var map in listOfPreferences) {
       final name = map['name'] as String;
       final value = map['value'] as String;
-      switch (map['type'] as String) {
-        case 'bool':
-          setPreferenceBool(
-              key: name, value: value == '1' || value.toLowerCase() == 'true');
-          break;
-        case 'double':
-          setPreferenceDouble(key: name, value: double.parse(value));
-          break;
-        case 'int':
-          setPreferenceInt(key: name, value: int.parse(value));
-          break;
-        case 'string':
-          setPreferenceString(key: name, value: value);
-        case 'json':
-          // TODO:  make proper json parsing or rather remove this type as possibility
-          setPreferenceJson(key: name, value: value);
-        default:
-          log.severe('Unknown preference type: ${map['type']} for key: $name');
+      try {
+        switch (map['type'] as String) {
+          case 'bool':
+            setPreferenceBool(
+                key: name, value: value == '1' || value.toLowerCase() == 'true');
+            break;
+          case 'double':
+            setPreferenceDouble(key: name, value: double.parse(value));
+            break;
+          case 'int':
+            setPreferenceInt(key: name, value: int.parse(value));
+            break;
+          case 'string':
+            setPreferenceString(key: name, value: value);
+            break;
+          case 'json':
+            // TODO:  make proper json parsing or rather remove this type as possibility
+            setPreferenceJson(key: name, value: value);
+            break;
+          default:
+            log.severe('Unknown preference type: ${map['type']} for key: $name');
+        }
+      } catch (e) {
+        // TODO: Catch the failing preference value and don't fail the whole import for now
+        log.severe('Failed to load preference "$name": $e');
       }
     }
   }

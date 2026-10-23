@@ -86,7 +86,7 @@ final class Backup {
       late File file;
       String? path;
       try {
-        path = await FilePicker.platform.getDirectoryPath();
+        path = await FilePicker.getDirectoryPath();
       } catch (e) {
         print(e);
       }
@@ -157,16 +157,14 @@ final class Backup {
   }
 
   static Future<bool> restoreBackupFromUserFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    final PlatformFile? result = await FilePicker.pickFile();
 
-    late File file;
-    if (result != null) {
-      file = File(result.files.single.path!);
-    } else {
+    final String? path = result?.path;
+    if (path == null) {
       return false;
     }
 
-    return restoreBackup(file);
+    return restoreBackup(File(path));
   }
 
   static Future<bool> restoreBackup(File file) async {

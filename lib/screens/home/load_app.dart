@@ -3,9 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hsk_learner/repositories/app_state_repository.dart';
 import 'package:hsk_learner/screens/home/home_page.dart';
+import 'package:hsk_learner/services/audio_service.dart';
 import 'package:hsk_learner/services/preferences_service.dart';
 import 'package:hsk_learner/sql/load_app_sql.dart';
 import 'package:hsk_learner/sql/schema_migration.dart';
+import 'package:logging/logging.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:provider/provider.dart';
 import 'package:version/version.dart';
@@ -22,26 +24,52 @@ class LoadApp extends StatefulWidget {
 class _LoadAppState extends State<LoadApp> {
   late final _preferencesService = context.read<PreferencesServiceBase>();
   late final _appState = context.read<AppStateRepositoryBase>();
+  late final _audioService = context.read<AudioServiceBase>();
   bool isLoading = true;
   @override
   void initState() {
-    _preferencesService.init();
-    getPreferences();
     super.initState();
+    _audioService.initialize();
+    _bootstrap();
   }
 
-  void getPreferences() async {
+  /// Copies the preferences from the DB -> shared preferences
+  Future<void> _bootstrap() async {
+    try {
+      await _preferencesService.init();
+    } catch (e) {
+      Logger.root.log(Level.SEVERE,
+          'Failed to copy preferences from database: $e');
+    }
+    if (!mounted) return;
+    await getPreferences();
+    if (!mounted) return;
+    init();
+  }
+
+  Future<void> getPreferences() async {
     //this could cause issues if Preferences should be changed after the
     //schema migration.
-    final Version appVersion = Version.parse(_appState.appVersion);
-    final Version latestVersion = Version.parse(await _getAppVersion());
+    var version = _appState.appVersion;
     final bool isFirstRun = _appState.isFirstRun;
-    if(appVersion < latestVersion && !isFirstRun){
+    Logger.root.log(Level.INFO, 'Version: $version');
+    Logger.root.log(Level.INFO, 'Is first run: $isFirstRun');
+
+    // First run
+    if(version == '') {
+      version = await _getAppVersion();
+    }
+
+    // Do DB migration based on the version difference
+    final appVersion = Version.parse(version);
+    final Version latestVersion = Version.parse(await _getAppVersion());
+    if (!mounted) return;
+    if(appVersion < latestVersion && !isFirstRun) {
       _appState.appVersion = latestVersion.toString();
       await SchemaMigration.run(_preferencesService);
+      if (!mounted) return;
       showUpdateChangesModal();
     }
-    init();
   }
 
   Future<String> _getAppVersion() async {
@@ -169,6 +197,7 @@ class _LoadAppState extends State<LoadApp> {
     const String versionUrl =
         'https://cdn.jsdelivr.net/gh/wuxialearn/data@main/version';
     final req = await http.get(Uri.parse(versionUrl));
+    if (!mounted) return;
     final String version = req.body.trim();
     //disable for this release as we will update sqlite file directly
     if (version != lastVersion && 1 == 0) {

@@ -39,7 +39,10 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         // Services
-        Provider<AudioServiceBase>(create: (context) => AudioService()),
+        Provider<AudioServiceBase>(
+          create: (context) => AudioService(),
+          dispose: (context, p) => p.dispose(),
+        ),
         Provider<DatabaseServiceBase>(create: (context) => DatabaseServiceImpl()),
         Provider<ThemeServiceBase>(create: (context) => ThemeService()),
 

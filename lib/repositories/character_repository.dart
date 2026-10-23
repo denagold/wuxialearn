@@ -80,9 +80,7 @@ class CharacterRepositoryImpl implements CharacterRepositoryBase {
   }
 
   Future<List<List<dynamic>>> parseDictionaryData(String responseBody) async {
-    return CsvToListConverter().convert(
-      responseBody,
-    );
+    return csv.decode(responseBody);
   }
 
   Future<List<List<dynamic>>> parseStrokeData(Uint8List responseBodyInBytes) async {
@@ -92,8 +90,7 @@ class CharacterRepositoryImpl implements CharacterRepositoryBase {
     );
     final graphicsCsvString = utf8.decode(archive);
 
-    return CsvToListConverter()
-        .convert(graphicsCsvString);
+    return csv.decode(graphicsCsvString);
   }
 
   @override

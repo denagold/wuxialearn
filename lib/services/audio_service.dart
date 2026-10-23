@@ -14,6 +14,7 @@ abstract class AudioServiceBase {
   Future<void> speak(String text);
   Future<void> playCorrectSound();
   Future<void> playWrongSound();
+  void dispose();
 }
 
 class AudioService implements AudioServiceBase {
@@ -67,11 +68,13 @@ class AudioService implements AudioServiceBase {
   }
 
   // Sound effect methods
+  @override
   Future<void> playCorrectSound() async {
     await playSound(audioName: AudioConstants.correct);
     log.info('Correct sound played');
   }
 
+  @override
   Future<void> playWrongSound() async {
     await playSound(audioName: AudioConstants.wrong);
     log.info('Wrong sound played');
@@ -84,11 +87,12 @@ class AudioService implements AudioServiceBase {
       await _audioPlayer.load();
       await _audioPlayer.play();
     } catch (e) {
-      log.warning('Error playing correct sound: $e');
+      log.warning('Error playing sound $audioName: $e');
     }
   }
 
   // Cleanup
+  @override
   void dispose() {
     _flutterTts.stop();
     _audioPlayer.dispose();
