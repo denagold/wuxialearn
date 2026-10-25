@@ -14,12 +14,55 @@ abstract class LearnRepositoryBase {
   void completeSubUnit({required int unit, required int subUnit});
   Future<List<Map<String, dynamic>>> getSubunitInfo({ required int unit });
   Future<List<Map<String, dynamic>>> getKnownSentences( List<Map<String, dynamic>> words );
+  Future<List<Map<String, dynamic>>> getTestOutWords({ required int hsk });
+  Future<void> completeHskLevel({ required int hsk });
 }
 
 class LearnRepositoryImpl implements LearnRepositoryBase {
   final DatabaseServiceBase dbService;
 
   LearnRepositoryImpl(this.dbService);
+
+  @override
+  Future<void> completeHskLevel({required int hsk}) async {
+    final db = await dbService.database;
+    final batch = db.batch();
+    batch.rawInsert(
+      """
+      UPDATE unit_info set completed = true where unit_id in
+        (select unit_id from units where hsk <= ?)
+      """,
+      [hsk],
+    );
+    batch.rawInsert(
+      """
+      update subunit_info set completed = 1 where subunit_id in (
+        SELECT subunit_id from subunits
+        join units on units.unit_id = subunits.unit
+        where units.hsk <= ?
+        order by subunits.unit
+      )
+      """,
+      [hsk],
+    );
+    batch.rawInsert(
+      """
+      INSERT INTO stats(date, wordid, value)
+        SELECT strftime('%s', 'now'), courses.id, 1 from courses
+        join units on units.unit_id = courses.unit
+        where units.hsk <= ?
+      """,
+      [hsk],
+    );
+    batch.rawInsert(
+      """
+      INSERT INTO review(id, deck, show_next) select id, course, strftime('%s', 'now') + (1 * 24 * 60 * 60)
+      from courses where hsk <= ?
+      """,
+      [hsk],
+    );
+    await batch.commit();
+  }
 
   @override
   Future<void> completeSubUnit({required int unit, required int subUnit}) async {
@@ -143,6 +186,23 @@ class LearnRepositoryImpl implements LearnRepositoryBase {
       WHERE unit = $unit
     """);
     return result;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getTestOutWords({required int hsk}) async {
+    final db = await dbService.database;
+    return db.rawQuery(
+      """
+      SELECT
+        id, hanzi, pinyin, translations0
+      FROM courses
+      join units on units.unit_id = courses.unit
+      where units.hsk <= ?
+      order by random()
+      limit 15
+      """,
+      [hsk],
+    );
   }
 
   @override

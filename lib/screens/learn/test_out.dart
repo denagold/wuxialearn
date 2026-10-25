@@ -3,7 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hsk_learner/extensions/word_item_extensions.dart';
 import 'package:hsk_learner/models/word_item.dart';
-import '../../sql/test_out_sql.dart';
+import 'package:hsk_learner/repositories/learn_repository.dart';
+import 'package:provider/provider.dart';
 import '../games/multiple_choice_game.dart';
 import '../games/unit_game.dart';
 
@@ -16,10 +17,11 @@ class TestOut extends StatefulWidget {
 }
 
 class _TestOutState extends State<TestOut> {
+  late final learnRepo = context.read<LearnRepositoryBase>();
   late Future<List<Map<String, dynamic>>> reviewWordsListFuture;
   @override
   void initState() {
-    reviewWordsListFuture = TestOutSql.getTestOutWords(hsk: widget.hsk);
+    reviewWordsListFuture = learnRepo.getTestOutWords(hsk: widget.hsk);
     super.initState();
   }
 
@@ -61,6 +63,7 @@ class _TestOutController extends StatefulWidget {
 }
 
 class _TestOutControllerState extends State<_TestOutController> {
+  late final learnRepo = context.read<LearnRepositoryBase>();
   final PageController _pageController = PageController();
   List<Widget> gamesList = [];
   int gameIndex = 0;
@@ -108,7 +111,7 @@ class _TestOutControllerState extends State<_TestOutController> {
   Future<void> updatePage() async {
     bool lastPage = gameIndex + 1 == gamesList.length;
     if (lastPage) {
-      await TestOutSql.completeHSKLevel(widget.hsk);
+      await learnRepo.completeHskLevel(hsk: widget.hsk);
       if (!mounted) return;
       Navigator.pop(context);
     } else {
