@@ -27,4 +27,6 @@ class FakeAudioService extends AudioServiceBase {
     return Future.value();
   }
 
+  @override
+  void dispose() {}
 }

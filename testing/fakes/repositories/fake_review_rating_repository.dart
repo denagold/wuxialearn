@@ -1,7 +1,7 @@
 import 'package:hsk_learner/models/review_rating.dart';
 import 'package:hsk_learner/repositories/review_rating_repository.dart';
 
-class FakeReviewRatingRepository implements ReviewRatingRepository {
+class FakeReviewRatingRepository implements ReviewRatingRepositoryBase {
   final List<ReviewRatingModel> _reviewRatings = [ ];
   var _id = 0;
 
@@ -18,7 +18,7 @@ class FakeReviewRatingRepository implements ReviewRatingRepository {
 
   @override
   Future<void> deleteReviewRating(int id) async {
-    _reviewRatings.removeAt(id);
+    _reviewRatings.removeWhere((r) => r.id == id);
   }
 
   @override
@@ -34,7 +34,7 @@ class FakeReviewRatingRepository implements ReviewRatingRepository {
 
   @override
   Future<void> updateReviewRating(ReviewRatingModel rating) async {
-    _reviewRatings.removeAt(rating.id);
+    _reviewRatings.removeWhere((r) => r.id == rating.id);
     _reviewRatings.add(rating);
   }
 }
