@@ -15,10 +15,10 @@ class WordRepositoryImpl implements WordRepositoryBase {
     final db = await dbService.database;
     return db.rawQuery("""
     SELECT * from sentences where characters like '%' || (
-      SELECT hanzi from courses where id = $id
+      SELECT hanzi from courses where id = ?
     ) || '%'
     order by unit asc
-    """);
+    """, [id]);
   }
 
   @override
@@ -34,7 +34,7 @@ class WordRepositoryImpl implements WordRepositoryBase {
             SELECT courses.id, courses.hanzi, translations0,
             courses.pinyin, unit, hsk, subunit,	course,
              SUBSTR(hanzi, 1, 1) a, SUBSTR(hanzi, 2, 1) b,
-            SUBSTR(hanzi, 3, 1) c, SUBSTR(hanzi, 4, 1) d FROM courses where id = $id
+            SUBSTR(hanzi, 3, 1) c, SUBSTR(hanzi, 4, 1) d FROM courses where id = ?
           ) as t1
           left join unihan a_tl on t1.a = a_tl.hanzi
           left join unihan b_tl on t1.b = b_tl.hanzi  
@@ -43,6 +43,6 @@ class WordRepositoryImpl implements WordRepositoryBase {
           left join stats on stats.wordid = t1.id
           left join review on review.id = t1.id
           order by t1.id
-    """);
+    """, [id]);
   }
 }

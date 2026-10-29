@@ -74,7 +74,56 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
   final DatabaseServiceBase dbService;
   final ReviewRatingRepositoryBase ratingRepo;
 
+  /// `ORDER BY` Columns
+  static const Set<String> _reviewSortColumns = {
+    'hsk',
+    'translations0',
+    'right_occurrence',
+    'wrong_occurrence',
+    'last_seen',
+    'score',
+    'percent_correct',
+    'RANDOM()',
+  };
+
+  static const Set<String> _manageReviewSortColumns = {
+    'unit',
+    'hsk',
+    'hanzi',
+    'pinyin',
+    'translations0',
+    'right_occurrence',
+    'wrong_occurrence',
+    'last_seen',
+    'score',
+    'percent_correct',
+    'RANDOM()',
+  };
+
   ReviewRepositoryImpl(this.dbService, {required this.ratingRepo});
+
+  String _validatedSortBy(String sortBy, Set<String> allowedColumns) {
+    if (!allowedColumns.contains(sortBy)) {
+      throw ArgumentError.value(
+        sortBy,
+        'sortBy',
+        'Must be one of: ${allowedColumns.join(', ')}',
+      );
+    }
+    return sortBy;
+  }
+
+  String _validatedOrderBy(String orderBy) {
+    final normalized = orderBy.toUpperCase();
+    if (normalized != 'ASC' && normalized != 'DESC') {
+      throw ArgumentError.value(
+        orderBy,
+        'orderBy',
+        'Must be ASC or DESC',
+      );
+    }
+    return normalized;
+  }
 
   @override
   Future<List<ReviewWord>> getReviewWords({
@@ -118,10 +167,7 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
   @override
   Future<List<ReviewWord>> getSrsReview({required int deckSize}) async {
     final db = await dbService.database;
-    String limit = "limit $deckSize";
-    if (deckSize < 0) {
-      limit = "";
-    }
+    final hasLimit = deckSize >= 0;
     final results = await db.rawQuery("""
         SELECT t1.id, t1.hanzi, t1.pinyin, translations0, subunit,
         a_tl.translation as char_one, b_tl.translation as char_two, c_tl.translation as char_three, d_tl.translation as char_four
@@ -140,8 +186,8 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
 		    WHERE show_next < strftime('%s')
         GROUP BY t1.id
         ORDER BY show_next ASC
-		    $limit
-      """);
+        ${hasLimit ? 'LIMIT ?' : ''}
+      """, <Object?>[if (hasLimit) deckSize]);
     return createReviewWordList(results);
   }
 
@@ -151,10 +197,7 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
     required int deckSize,
   }) async {
     final db = await dbService.database;
-    String limit = "limit $deckSize";
-    if (deckSize < 0) {
-      limit = "";
-    }
+    final hasLimit = deckSize >= 0;
     final results = await db.rawQuery("""
         SELECT t1.id, t1.hanzi, t1.pinyin, translations0, subunit,
         a_tl.translation as char_one, b_tl.translation as char_two, c_tl.translation as char_three, d_tl.translation as char_four
@@ -173,8 +216,8 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
         where deck = ? and rating_id is null
         GROUP BY t1.id
         ORDER BY t1.id ASC
-        $limit
-      """, [deck]);
+        ${hasLimit ? 'LIMIT ?' : ''}
+      """, <Object?>[deck, if (hasLimit) deckSize]);
     return createReviewWordList(results);
   }
 
@@ -186,6 +229,10 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
     required String deckName,
   }) async {
     final db = await dbService.database;
+    final safeSortBy = _validatedSortBy(sortBy, _reviewSortColumns);
+    final safeOrderBy = _validatedOrderBy(orderBy);
+    final hasLimit = deckSize >= 0;
+    final args = <Object?>[deckName, if (hasLimit) deckSize];
     final results = await db.rawQuery("""
         SELECT t1.id, t1.score, t1.percent_correct, t1.hanzi,
         t1.translations0, t1.hsk, t1.pinyin,
@@ -223,9 +270,9 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
     join review on review.id = t1.id
     where deck = ?
     GROUP BY t1.id
-    ORDER BY $sortBy $orderBy
-    LIMIT $deckSize;
-    """, [deckName]);
+    ORDER BY $safeSortBy $safeOrderBy
+    ${hasLimit ? 'LIMIT ?' : ''};
+    """, args);
     return createReviewWordList(results);
   }
 
@@ -286,8 +333,8 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
     required String deckName,
   }) async {
     final db = await dbService.database;
-    final safeSortBy = _sanitizeOrderColumn(sortBy);
-    final safeOrderBy = _sanitizeOrderDirection(orderBy);
+    final safeSortBy = _validatedSortBy(sortBy, _manageReviewSortColumns);
+    final safeOrderBy = _validatedOrderBy(orderBy);
     String deckFilter;
     List<dynamic> queryArgs;
     if (deckName.toLowerCase() == DeckType.any.toDbString()) {
@@ -325,17 +372,6 @@ class ReviewRepositoryImpl implements ReviewRepositoryBase {
       ${hasLimit ? 'LIMIT ?' : ''};
     """, queryArgs);
     return createReviewStatisticsList(results);
-  }
-
-  String _sanitizeOrderColumn(String column) {
-    final sanitized = column.replaceAll(RegExp(r'[^a-zA-Z0-9_,.\s]'), '');
-    return sanitized;
-  }
-
-  String _sanitizeOrderDirection(String direction) {
-    final upper = direction.toUpperCase();
-    if (upper == 'DESC') return 'DESC';
-    return 'ASC';
   }
 
   @override

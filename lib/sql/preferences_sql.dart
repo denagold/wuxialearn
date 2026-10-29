@@ -1,25 +1,26 @@
 import 'package:hsk_learner/sql/sql_helper.dart';
 
 class PreferencesSql {
-  static void insertPreference({
+  static Future<void> insertPreference({
     required String name,
     required String value,
     required String type,
   }) async {
     final db = await SQLHelper.db();
     await db.rawInsert("""
-        insert into preferences(name, value, type) values('$name', '$value', '$type')
-        """);
+        insert into preferences(name, value, type) values(?, ?, ?)
+        """, [name, value, type]);
   }
 
-  static void setPreference({
+  static Future<void> setPreference({
     required String name,
     required String value,
     required String type,
   }) async {
     final db = await SQLHelper.db();
-    await db.rawInsert(
-      "UPDATE preferences SET name = '$name', value = '$value', type  = '$type' WHERE name = '$name' ",
+    await db.rawUpdate(
+      "UPDATE preferences SET name = ?, value = ?, type = ? WHERE name = ?",
+      [name, value, type, name],
     );
   }
 

@@ -126,10 +126,10 @@ class _ReviewPageState extends State<ReviewPage> {
 
   void _loadReviewType() {
     setState(() {
-      reviewTypeValue = reviewPrefs.reviewType ?? flashCardType;
+      reviewTypeValue = reviewPrefs.reviewType;
       reviewWords = ReviewWordType.fromString(reviewPrefs.reviewWords);
       deckSize = DeckSize.fromString(reviewPrefs.deckSize);
-      deckName = reviewPrefs.deckName ?? 'hsk';
+      deckName = reviewPrefs.deckName;
     });
   }
 

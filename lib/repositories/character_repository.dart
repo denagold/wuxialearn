@@ -107,9 +107,9 @@ class CharacterRepositoryImpl implements CharacterRepositoryBase {
       ) async {
     final db = await dbService.database;
     final a = db.rawQuery("""
-    SELECT * from sentences where characters like '%$char%'
+    SELECT * from sentences where characters like ?
     order by unit asc
-    """);
+    """, ['%$char%']);
     return a;
   }
 
@@ -120,9 +120,9 @@ class CharacterRepositoryImpl implements CharacterRepositoryBase {
      SELECT
      id, hanzi, pinyin, translation
      from unihan
-     where hanzi = '$char'
+     where hanzi = ?
      limit 1
-    """);
+    """, [char]);
     return a;
   }
 }

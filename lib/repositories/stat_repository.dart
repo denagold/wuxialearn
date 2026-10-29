@@ -15,7 +15,7 @@ abstract class StatRepositoryBase {
     required int deckSize,
     required String sortBy,
     required String orderBy,
-    String where = "",
+    bool onlyWrong = false,
   });
 
   Future<void> insertStat({required int value, required int id});
@@ -24,7 +24,48 @@ abstract class StatRepositoryBase {
 class StatRepositoryImpl implements StatRepositoryBase {
   final DatabaseServiceBase dbService;
 
+  /// `ORDER BY` columns.
+  static const Set<String> _sortableColumns = {
+    'string_date',
+    'right_occurrence',
+    'wrong_occurrence',
+    'new_word',
+    'total',
+    'score',
+    'id',
+    'unit',
+    'hsk',
+    'hanzi',
+    'pinyin',
+    'translations0',
+    'last_seen',
+    'percent_correct',
+  };
+
   StatRepositoryImpl(this.dbService);
+
+  String _validatedSortBy(String sortBy) {
+    if (!_sortableColumns.contains(sortBy)) {
+      throw ArgumentError.value(
+        sortBy,
+        'sortBy',
+        'Must be one of: ${_sortableColumns.join(', ')}',
+      );
+    }
+    return sortBy;
+  }
+
+  String _validatedOrderBy(String orderBy) {
+    final normalized = orderBy.toUpperCase();
+    if (normalized != 'ASC' && normalized != 'DESC') {
+      throw ArgumentError.value(
+        orderBy,
+        'orderBy',
+        'Must be ASC or DESC',
+      );
+    }
+    return normalized;
+  }
 
   @override
   Future<List<Map<String, dynamic>>> getTimeline({
@@ -33,6 +74,8 @@ class StatRepositoryImpl implements StatRepositoryBase {
     required String orderBy,
   }) async {
     final db = await dbService.database;
+    final hasLimit = deckSize >= 0;
+    final args = <Object?>[if (hasLimit) deckSize];
     return db.rawQuery("""
     SELECT string_date, right_occurrence, wrong_occurrence, 
     new_word,
@@ -49,9 +92,9 @@ class StatRepositoryImpl implements StatRepositoryBase {
         string_date
     )
     WHERE string_date > DATE('now', '-7 days')
-    ORDER BY $sortBy $orderBy
-    LIMIT $deckSize;
-    """);
+    ORDER BY ${_validatedSortBy(sortBy)} ${_validatedOrderBy(orderBy)}
+    ${hasLimit ? 'LIMIT ?' : ''}
+    """, args);
   }
 
   @override
@@ -156,9 +199,12 @@ class StatRepositoryImpl implements StatRepositoryBase {
     required int deckSize,
     required String sortBy,
     required String orderBy,
-    String where = "",
+    bool onlyWrong = false,
   }) async {
     final db = await dbService.database;
+    final where = onlyWrong ? 'WHERE wrong_occurrence > 0' : '';
+    final hasLimit = deckSize >= 0;
+    final args = <Object?>[if (hasLimit) deckSize];
     return db.rawQuery("""
     SELECT courses.id, right_occurrence, wrong_occurrence, 
     courses.hanzi, courses.hsk, courses.pinyin, courses.translations0,
@@ -178,16 +224,17 @@ class StatRepositoryImpl implements StatRepositoryBase {
     )
     INNER JOIN courses on courses.id = wordid
     $where
-    ORDER BY $sortBy $orderBy
-    LIMIT $deckSize;
-    """);
+    ORDER BY ${_validatedSortBy(sortBy)} ${_validatedOrderBy(orderBy)}
+    ${hasLimit ? 'LIMIT ?' : ''}
+    """, args);
   }
 
   @override
   Future<void> insertStat({required int value, required int id}) async {
     final db = await dbService.database;
     await db.rawInsert(
-      "INSERT INTO stats(date, wordid, value) VALUES(strftime('%s', 'now'), $id, $value)",
+      "INSERT INTO stats(date, wordid, value) VALUES(strftime('%s', 'now'), ?, ?)",
+      [id, value],
     );
   }
 }

@@ -71,18 +71,19 @@ class LearnRepositoryImpl implements LearnRepositoryBase {
       UPDATE subunit_info SET completed = 1 
       WHERE subunit_id = (
         select subunit_id from subunits
-        where unit = $unit AND subunit = $subUnit
+        where unit = ? AND subunit = ?
         limit 1
       )
     """;
-    await db.rawInsert(sql);
+    await db.rawInsert(sql, [unit, subUnit]);
   }
 
   @override
   Future<void> completeUnit({required int unit}) async {
     final db = await dbService.database;
     await db.rawInsert(
-      'UPDATE unit_info SET completed = 1 WHERE unit_id = $unit ',
+      'UPDATE unit_info SET completed = 1 WHERE unit_id = ?',
+      [unit],
     );
   }
 
@@ -104,87 +105,107 @@ class LearnRepositoryImpl implements LearnRepositoryBase {
   @override
   Future<List<Map<String, dynamic>>> count2({required String courseName}) async {
     final db = await dbService.database;
-    var result = db.rawQuery("""
+    var result = db.rawQuery(
+      """
       SELECT
         *
       FROM units_with_info as units
-      WHERE course = '$courseName'
+      WHERE course = ?
       and visible = 1
       ORDER BY unit_order
-    """);
+      """,
+      [courseName],
+    );
     return result;
   }
 
   @override
   Future<List<Map<String, dynamic>>> getExamples(String word) async {
     final db = await dbService.database;
-    return db.rawQuery("""
+    return db.rawQuery(
+      """
       SELECT
         characters, pinyin, meaning 
       FROM sentences  
-      WHERE instr(characters, '$word') > 0 
+      WHERE instr(characters, ?) > 0 
       ORDER BY unit ASC
       LIMIT 3;
-    """);
+      """,
+      [word],
+    );
   }
 
   @override
   Future<List<Map<String, dynamic>>> getHskLevel(int unit) async {
     final db = await dbService.database;
-    return db.rawQuery("""
+    return db.rawQuery(
+      """
       SELECT
         id, hanzi, pinyin, translations0, subunit
       FROM courses
-      WHERE unit = $unit
+      WHERE unit = ?
       ORDER BY subunit ASC
-    """);
+      """,
+      [unit],
+    );
   }
 
   @override
   Future<List<Map<String, dynamic>>> getKnownSentences(List<Map<String, dynamic>> words) async {
     final db = await dbService.database;
-    String sql = "SELECT * from sentences where characters REGEXP";
-    sql += "'^(?:(?: ，|。";
+    String pattern = "^(?:(?: ，|。";
     for (int i = 0; i < words.length; i++) {
-      sql += "| ${words[i]["hanzi"]}";
+      pattern += "| ${words[i]["hanzi"]}";
     }
-    sql += "))*\$'";
-    return db.rawQuery(sql);
+    pattern += "))*\$";
+    return db.rawQuery(
+      "SELECT * from sentences where characters REGEXP ?",
+      [pattern],
+    );
   }
 
   @override
   Future<List<Map<String, dynamic>>> getSentences(int unit) async {
     final db = await dbService.database;
-    return db.rawQuery("""
+    return db.rawQuery(
+      """
       SELECT
         characters, pinyin, meaning, id, subunit
       FROM sentences  
-      WHERE unit = $unit
+      WHERE unit = ?
       ORDER BY subunit
-    """);
+      """,
+      [unit],
+    );
   }
 
   @override
   Future<List<Map<String, dynamic>>> getSentencesForSubunit(int unit, int subunit) async {
     final db = await dbService.database;
-    return db.rawQuery("""
+    return db.rawQuery(
+      """
       SELECT
         characters, pinyin, meaning, id, subunit
       FROM sentences  
-      WHERE unit = $unit
-      AND subunit = $subunit
+      WHERE unit = ?
+      AND subunit = ?
       ORDER BY subunit
-    """);
+      """,
+      [unit, subunit],
+    );
   }
 
   @override
   Future<List<Map<String, dynamic>>> getSubunitInfo({required int unit}) async {
     final db = await dbService.database;
-    var result = db.rawQuery("""
+    var result = db.rawQuery(
+      """
       SELECT unit, subunit, completed
       FROM subunits_with_info as subunits
-      WHERE unit = $unit
-    """);
+      WHERE unit = ?
+      """,
+      [unit],
+    );
     return result;
   }
 
@@ -208,19 +229,23 @@ class LearnRepositoryImpl implements LearnRepositoryBase {
   @override
   Future<List<Map<String, dynamic>>> getUnit(int unit) async {
     final db = await dbService.database;
-    return db.rawQuery("""
+    return db.rawQuery(
+      """
       SELECT
         id, hanzi, pinyin, translations0, subunit, unit
       FROM courses
-      WHERE unit = $unit
+      WHERE unit = ?
       ORDER BY subunit ASC
-    """);
+      """,
+      [unit],
+    );
   }
 
   @override
   Future<List<Map<String, dynamic>>> getUnitWithLiteralMeaning(int unit) async {
     final db = await dbService.database;
-    return db.rawQuery("""
+    return db.rawQuery(
+      """
         SELECT t1.id, t1.hanzi, t1.pinyin, translations0, subunit,
         a_tl.translation as char_one, b_tl.translation as char_two, c_tl.translation as char_three, d_tl.translation as char_four
             from(
@@ -229,7 +254,7 @@ class LearnRepositoryImpl implements LearnRepositoryBase {
                 SUBSTR(hanzi, 1, 1) a, SUBSTR(hanzi, 2, 1) b,
                 SUBSTR(hanzi, 3, 1) c, SUBSTR(hanzi, 4, 1) d
               FROM courses
-              WHERE unit = $unit
+              WHERE unit = ?
             ) as t1
         left join unihan a_tl on t1.a = a_tl.hanzi
         left join unihan b_tl on t1.b = b_tl.hanzi  
@@ -237,8 +262,10 @@ class LearnRepositoryImpl implements LearnRepositoryBase {
         left join unihan d_tl on t1.d = d_tl.hanzi 
         GROUP BY t1.id
         ORDER BY subunit ASC
-    """);
+        """,
+      [unit],
+    );
   }
 
-  
+
 }

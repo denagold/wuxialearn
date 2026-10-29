@@ -34,7 +34,7 @@ class _StatsHomeState extends State<StatsHome> {
       sortBy: "percent_correct",
       orderBy: "ASC",
       deckSize: 10,
-      where: "WHERE wrong_occurrence > 0",
+      onlyWrong: true,
     );
     recentHskList = getStats(
       sortBy: "last_seen",
@@ -50,13 +50,13 @@ class _StatsHomeState extends State<StatsHome> {
     required String sortBy,
     required String orderBy,
     required int deckSize,
-    String where = "",
+    bool onlyWrong = false,
   }) async {
     return await statRepo.getStats(
       sortBy: sortBy,
       orderBy: orderBy,
       deckSize: deckSize,
-      where: where,
+      onlyWrong: onlyWrong,
     );
   }
 

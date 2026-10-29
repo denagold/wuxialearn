@@ -76,8 +76,8 @@ class SQLHelper {
     sql.DatabaseExecutor db,
   ) async {
     final exists = await db.rawQuery("""
-      SELECT COUNT(*) AS exist FROM pragma_table_info('$table') WHERE name='$column'
-    """);
+      SELECT COUNT(*) AS exist FROM pragma_table_info(?) WHERE name = ?
+    """, [table, column]);
     return exists[0]["exist"] != 0;
   }
 }
