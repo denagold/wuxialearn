@@ -1,65 +1,83 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hsk_learner/repositories/review_rating_repository.dart';
 import 'package:hsk_learner/repositories/review_repository.dart';
-import 'package:sqflite/sqflite.dart' as sql;
 
-import '../../testing/fakes/repositories/fake_review_rating_repository.dart';
-import '../helpers/in_memory_db_service.dart';
+import '../helpers/test_db.dart';
 
 void main() {
   group('ReviewRepository', () {
-    late sql.Database db;
+    late TestDb testDb;
     late ReviewRepositoryBase repo;
 
     setUp(() async {
-      db = await openInMemoryDatabase();
-      await db.execute('''
-        CREATE TABLE courses (
-          id INTEGER PRIMARY KEY,
-          hanzi TEXT,
-          pinyin TEXT,
-          translations0 TEXT,
-          subunit TEXT,
-          unit INTEGER,
-          hsk INTEGER
-        )
-      ''');
-      await db.execute('''
-        CREATE TABLE unihan (
-          hanzi TEXT,
-          pinyin TEXT,
-          translation TEXT
-        )
-      ''');
-      await db.execute('''
-        CREATE TABLE review (
-          id INTEGER,
-          deck TEXT,
-          show_next INTEGER,
-          rating_id INTEGER
-        )
-      ''');
-      await db.execute('''
-        CREATE TABLE stats (
-          wordid INTEGER,
-          date INTEGER,
-          value INTEGER
-        )
-      ''');
+      // Real production schema (courses, unihan, review, review_rating,
+      // stats) from the asset DB copy; content tables are emptied, the
+      // default ratings keep their seeded rows.
+      testDb = await TestDb.open();
+      final db = testDb.db;
 
-      await db.insert('courses',
-          {'id': 1, 'hanzi': '天', 'pinyin': 'tiān', 'translations0': 'sky', 'subunit': 's1', 'unit': 1, 'hsk': 1});
-      await db.insert('courses',
-          {'id': 2, 'hanzi': '好', 'pinyin': 'hǎo', 'translations0': 'good', 'subunit': 's1', 'unit': 1, 'hsk': 1});
-      await db.insert('courses',
-          {'id': 3, 'hanzi': '学', 'pinyin': 'xué', 'translations0': 'study', 'subunit': 's2', 'unit': 2, 'hsk': 2});
-      await db.insert('unihan', {'hanzi': '天', 'pinyin': 'tiān', 'translation': 'sky; day'});
-      await db.insert('unihan', {'hanzi': '好', 'pinyin': 'hǎo', 'translation': 'good'});
-      await db.insert('unihan', {'hanzi': '学', 'pinyin': 'xué', 'translation': 'study'});
+      await db.insert('courses', {
+        'id': 1,
+        'hanzi': '天',
+        'pinyin': 'tiān',
+        'translations0': 'sky',
+        'subunit': 1,
+        'unit': 1,
+        'hsk': 1,
+      });
+      await db.insert('courses', {
+        'id': 2,
+        'hanzi': '好',
+        'pinyin': 'hǎo',
+        'translations0': 'good',
+        'subunit': 1,
+        'unit': 1,
+        'hsk': 1,
+      });
+      await db.insert('courses', {
+        'id': 3,
+        'hanzi': '学',
+        'pinyin': 'xué',
+        'translations0': 'study',
+        'subunit': 2,
+        'unit': 2,
+        'hsk': 2,
+      });
+      await db.insert('unihan', {
+        'hanzi': '天',
+        'pinyin': 'tiān',
+        'translation': 'sky; day',
+      });
+      await db.insert('unihan', {
+        'hanzi': '好',
+        'pinyin': 'hǎo',
+        'translation': 'good',
+      });
+      await db.insert('unihan', {
+        'hanzi': '学',
+        'pinyin': 'xué',
+        'translation': 'study',
+      });
 
       // All words are due (show_next in the past) and uncategorized.
-      await db.insert('review', {'id': 1, 'deck': 'hsk', 'show_next': 1000, 'rating_id': null});
-      await db.insert('review', {'id': 2, 'deck': 'hsk', 'show_next': 1000, 'rating_id': null});
-      await db.insert('review', {'id': 3, 'deck': 'wuxia', 'show_next': 1000, 'rating_id': null});
+      await db.insert('review', {
+        'id': 1,
+        'deck': 'hsk',
+        'show_next': 1000,
+        'rating_id': null,
+      });
+      await db.insert('review', {
+        'id': 2,
+        'deck': 'hsk',
+        'show_next': 1000,
+        'rating_id': null,
+      });
+      await db.insert('review', {
+        'id': 3,
+        'deck': 'wuxia',
+        'show_next': 1000,
+        'rating_id': null,
+      });
 
       // Word 1: 2 right, 1 wrong -> score 1.
       // Word 2: 0 right, 2 wrong -> score -2.
@@ -71,14 +89,16 @@ void main() {
       await db.insert('stats', {'wordid': 2, 'date': 200, 'value': 0});
       await db.insert('stats', {'wordid': 3, 'date': 100, 'value': 1});
 
+      // Real implementations on the shared test database; no fakes.
+      final dbService = TestDbService(db);
       repo = ReviewRepositoryImpl(
-        InMemoryDbService(db),
-        ratingRepo: FakeReviewRatingRepository(),
+        dbService,
+        ratingRepo: ReviewRatingRepositoryImpl(dbService),
       );
     });
 
     tearDown(() async {
-      await db.close();
+      await testDb.close();
     });
 
     group('getReview', () {
@@ -102,7 +122,9 @@ void main() {
           ),
           throwsA(isA<ArgumentError>()),
         );
-        final tables = await db.rawQuery("SELECT count(1) as count FROM courses");
+        final tables = await testDb.db.rawQuery(
+          "SELECT count(1) as count FROM courses",
+        );
         expect(tables.first['count'], 3);
       });
 
@@ -116,7 +138,9 @@ void main() {
           ),
           throwsA(isA<ArgumentError>()),
         );
-        final tables = await db.rawQuery("SELECT count(1) as count FROM courses");
+        final tables = await testDb.db.rawQuery(
+          "SELECT count(1) as count FROM courses",
+        );
         expect(tables.first['count'], 3);
       });
 
@@ -176,7 +200,9 @@ void main() {
           ),
           throwsA(isA<ArgumentError>()),
         );
-        final tables = await db.rawQuery("SELECT count(1) as count FROM stats");
+        final tables = await testDb.db.rawQuery(
+          "SELECT count(1) as count FROM stats",
+        );
         expect(tables.first['count'], 6);
       });
     });
@@ -216,6 +242,26 @@ void main() {
         );
         expect(injected, isEmpty);
       });
+    });
+
+    group('getReviewRatings', () {
+      // Exercises the real ReviewRatingRepositoryImpl against the seeded
+      // review_rating table shipped in the asset database.
+      test(
+        'returns the seeded default ratings ordered by duration start',
+        () async {
+          final ratings = await repo.getReviewRatings();
+          expect(ratings.map((r) => r.name).toList(), [
+            'again',
+            'hard',
+            'good',
+            'easy',
+            'perfect',
+          ]);
+          expect(ratings.first.durationStart.inSeconds, 60);
+          expect(ratings.last.durationEnd.inSeconds, 2592000);
+        },
+      );
     });
   });
 }

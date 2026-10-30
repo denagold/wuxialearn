@@ -1,44 +1,30 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hsk_learner/repositories/character_repository.dart';
-import 'package:sqflite/sqflite.dart' as sql;
 
-import '../helpers/in_memory_db_service.dart';
+import '../helpers/test_db.dart';
 
 void main() {
   group('CharacterRepository', () {
-    late sql.Database db;
+    late TestDb testDb;
     late CharacterRepositoryBase repo;
 
     setUp(() async {
-      db = await openInMemoryDatabase();
-      await db.execute('''
-        CREATE TABLE sentences (
-          id INTEGER PRIMARY KEY,
-          characters TEXT,
-          unit INTEGER
-        )
-      ''');
-      await db.execute('''
-        CREATE TABLE unihan (
-          id INTEGER PRIMARY KEY,
-          hanzi TEXT,
-          pinyin TEXT,
-          translation TEXT
-        )
-      ''');
-      await db.insert('sentences', {'characters': '今天天气很好', 'unit': 1});
-      await db.insert('sentences', {'characters': '天气很好', 'unit': 2});
-      await db.insert('sentences', {'characters': '明天再见', 'unit': 1});
-      await db.insert(
-        'unihan',
-        {'hanzi': '天', 'pinyin': 'tiān', 'translation': 'sky; day'},
-      );
+      testDb = await TestDb.open();
+      // Test sentences seeded
+      await testDb.db.insert('sentences', {'characters': '今天天气很好', 'unit': 1});
+      await testDb.db.insert('sentences', {'characters': '天气很好', 'unit': 2});
+      await testDb.db.insert('sentences', {'characters': '明天再见', 'unit': 1});
+      await testDb.db.insert('unihan', {
+        'hanzi': '天',
+        'pinyin': 'tiān',
+        'translation': 'sky; day',
+      });
 
-      repo = CharacterRepositoryImpl(InMemoryDbService(db));
+      repo = CharacterRepositoryImpl(TestDbService(testDb.db));
     });
 
     tearDown(() async {
-      await db.close();
+      await testDb.close();
     });
 
     group('getSentenceFromId', () {
